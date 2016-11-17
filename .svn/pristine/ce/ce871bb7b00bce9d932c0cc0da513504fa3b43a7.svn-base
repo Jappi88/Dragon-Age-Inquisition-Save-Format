@@ -1,0 +1,392 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
+using Dragon_Age_Inquisition_Save_Editor.DAIO;
+using HavenInterface.IOPackage;
+using HavenInterface.PS3FileSystem;
+using Telerik.WinControls.UI;
+
+namespace Dragon_Age_Inquisition_Save_Editor.SaveData
+{
+    public class Inclusion
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class Agent
+    {
+        public short Entry { get; set; }
+        public int NameHash { get; set; }
+        public short Index { get; set; }
+    }
+
+    public class AgentLookup
+    {
+        public int[] Agent { get; set; }
+        public short Index { get; set; }
+    }
+
+    public class SubLevelInfo
+    {
+        public int GroupID { get; set; }
+        public int BundleType { get; set; }
+        public int Status { get; set; }
+        public bool AllowGrow { get; set; }
+        public int InitSize { get; set; }
+        public int HeapType { get; set; }
+        public int ParentBundleHash { get; set; }
+        public int BundleHash { get; set; }
+        public string Name { get; set; }
+        public int SubLevel { get; set; }
+    }
+
+    public class LookupTable
+    {
+        public int Id { get; set; }
+        public bool HasCreatePos { get; set; }
+        public int CreatePos { get; set; }
+        public bool HasInitPos { get; set; }
+        public int InitPos { get; set; }
+    }
+
+    public class ExternalReference
+    {
+        public int SubLevel { get; set; }
+        public int Bundle { get; set; }
+        public short EntityCount { get; set; }
+        public int[] Entities { get; set; }
+    }
+
+    public class SpawnedGhost
+    {
+        public short Complex { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Complex = (short) io.ReadBit2(0xA);
+        }
+    }
+
+    public class EntityData
+    {
+        private SaveDataStructure xstruct;
+        public int EntityCreate { get; set; }
+        public int TotalSpawnCount { get; set; }
+        public short OccupiedPointCount { get; set; }
+        public byte[][] OccupiedPoints { get; set; }
+        public short RecentlyUsedPointCount { get; set; }
+        public byte[][] RecentlyUsedPoints { get; set; }
+        public short SpawnedGhostCount { get; set; }
+        public SpawnedGhost[] SpawnedGhosts { get; set; }
+        public int SaveDataByteCount { get; set; }
+        public byte[] SaveData { get; set; }
+        public short ClonedEventCount { get; set; }
+        public int[] ClonedEvents { get; set; }
+        public bool HasLoadSession { get; set; }
+
+        public void Read(DAIIO io, SaveDataStructure xstr)
+        {
+            xstruct = xstr;
+            EntityCreate = io.ReadBit2(0x18);
+            SaveDataByteCount = io.ReadBit2(0x20);
+            SaveData = io.ReadBytes(SaveDataByteCount);
+            if (xstruct.EntityVersion < 7)
+            {
+                ClonedEventCount = io.ReadInt16();
+                ClonedEvents = new int[ClonedEventCount];
+                for (int i = 0; i < ClonedEventCount; i++)
+                    ClonedEvents[i] = io.ReadBit2(0x18);
+            }
+            HasLoadSession = io.ReadBoolean();
+            //TotalSpawnCount = io.ReadBit2(0x18);
+            //if (xstr.EntityVersion < 9)
+            //{
+            //    OccupiedPointCount = (short) io.ReadBit2(0x10);
+            //    OccupiedPoints = new byte[OccupiedPointCount][];
+            //    for (int i = 0; i < OccupiedPointCount; i++)
+            //    {
+            //        OccupiedPoints[i] = new byte[0xC];
+            //        for (int j = 0; j < 0xC; j++)
+            //            OccupiedPoints[i][j] = (byte) io.ReadBit(0x8);
+            //    }
+            //}
+            //RecentlyUsedPointCount = (short)io.ReadBit2(0x10);
+            //RecentlyUsedPoints = new byte[RecentlyUsedPointCount][];
+            //for (int i = 0; i < RecentlyUsedPointCount; i++)
+            //{
+            //    RecentlyUsedPoints[i] = new byte[0xC];
+            //    for (int j = 0; j < 0xC; j++)
+            //        RecentlyUsedPoints[i][j] = (byte)io.ReadBit(0x8);
+            //}
+            //SpawnedGhostCount = (short) io.ReadBit2(0x10);
+            //SpawnedGhosts = new SpawnedGhost[SpawnedGhostCount];
+            //for (int i = 0; i < SpawnedGhostCount; i++)
+            //{
+            //    var sp = new SpawnedGhost();
+            //    sp.Read(io);
+            //    SpawnedGhosts[i] = sp;
+            //}
+        }
+    }
+
+    public class SaveDataStructure
+    {
+        public static readonly byte[] DataMagic = new byte[]{0x46,0x42,0x00,0x53,0x41,0x56,0x45,0x0A};
+        public DateTime SavedTime { get; set; }
+        public string SID { get; set; }
+        public ushort GameVersion { get; set; }
+        public ushort SaveVersion { get; set; }
+        public ushort ProjectVersion { get; set; }
+        public ushort BitstreamFeatures { get; set; }
+        public uint ChangeList { get; set; }
+        public string Level { get; set; }
+        public uint Difficulty { get; set; }
+        public ushort BundleCount { get; set; }
+        public string[] BundleList { get; set; }
+        public ushort InclusionCount { get; set; }
+        public Inclusion[] Inclusions { get; set; }
+        public int SubLevelInfoCount { get; set; }
+        public SubLevelInfo[] SubLevelEntries { get; set; }
+        public byte[] LevelChecksum { get; set; }
+        public int DLC { get; set; }
+        public short EntityVersion { get; set; }
+        public short ProjectVersionContext { get; set; }
+        public bool HasDebugInfo { get; set; }
+        public int AgentTocBookmark { get; set; }
+        public int AgentToc { get; set; }
+        public int AgentCount { get; set; }
+        public Agent[] Agents { get; set; }
+        public int ClientDataBookmark { get; set; }
+        public int EntityContentLength { get; set; }
+        //public byte[] EntityContent { get; set; }
+        public EntityData EntityContent { get; set; }
+        public int SaveEntityComplexLength { get; set; }
+        public byte[] SaveEntityComplex{ get; set; }
+        public int SaveEntityBookmark { get; set; }
+        public int AgentsEntityPass { get; set; }
+        public AgentEntity AgentEntityData { get; set; }
+        public int AgentsLookupCount { get; set; }
+        public AgentLookup[] AgentLookups { get; set; }
+        public int EntityMeta { get; set; }
+        public short LookupTableCount { get; set; }
+        public LookupTable[] LookupTables { get; set; }
+        public short InternalReferenceCount { get; set; }
+        public int[] InternalReferences { get; set; }
+        public short ExternalReferenceCount { get; set; }
+        public ExternalReference[] ExternalReferences { get; set; }
+        public short DeletedEntityCount { get; set; }
+        public int[] DeletedEntities { get; set; }
+        public int ClientDataLength { get; set; }
+        public ClientData ClientData{ get; set; }
+
+        public void Read(ref DAIIO io, bool isbigendian)
+        {
+            byte[] xdm = io.ReadBytes(0x41, false);
+            if (!xdm.MemCompare(DataMagic, 0))
+                throw new Exception("Invalid Save Data Header!");
+            SavedTime = io.ReadInt64().ToUnixTime();
+            ushort count = io.ReadUInt16();
+            SID = io.ReadString(count);
+            GameVersion = io.ReadUInt16();
+            SaveVersion = io.ReadUInt16();
+            ProjectVersion = io.ReadUInt16();
+            BitstreamFeatures = io.ReadUInt16();
+            ChangeList = io.ReadUInt32();
+            count = io.ReadUInt16();
+            Level = io.ReadString(count);
+            Difficulty = io.ReadUInt32();
+            BundleCount = io.ReadUInt16();
+            BundleList = new string[BundleCount];
+            for (int i = 0; i < BundleCount; i++)
+            {
+                count = io.ReadUInt16();
+                BundleList[i] = io.ReadString(count);
+            }
+            InclusionCount = io.ReadUInt16();
+            Inclusions = new Inclusion[InclusionCount];
+            for (int i = 0; i < InclusionCount; i++)
+            {
+                var x = new Inclusion();
+                x.ID = io.ReadInt24();
+                count = io.ReadUInt16();
+                x.Name = io.ReadString(count);
+                count = io.ReadUInt16();
+                x.Value = io.ReadString(count);
+                Inclusions[i] = x;
+            }
+            SubLevelInfoCount = io.ReadBit2(0xc);
+            if (SubLevelInfoCount <= 0x40 && SubLevelInfoCount > 0)
+            {
+                SubLevelEntries = new SubLevelInfo[SubLevelInfoCount];
+                for (int i = 0; i < SubLevelInfoCount; i++)
+                {
+                    var x = new SubLevelInfo();
+                    x.SubLevel = io.ReadBit2(0x18);
+                    count = (ushort) io.ReadBit2(0x10);
+                    x.Name = io.ReadString(count);
+                    x.BundleHash = io.ReadBit2(0x20);
+                    x.ParentBundleHash = io.ReadBit2(0x20);
+                    x.HeapType = io.ReadBit2(0x8);
+                    x.InitSize = io.ReadBit2(0x20);
+                    x.AllowGrow = io.ReadBoolean();
+                    x.Status = io.ReadBit2(0x8);
+                    x.BundleType = io.ReadBit2(0x8);
+                    x.GroupID = io.ReadBit2(0x20);
+                    SubLevelEntries[i] = x;
+                }
+            }
+            LevelChecksum = new byte[0x10];
+            for (int i = 0; i < 0x10; i++)
+                LevelChecksum[i] = (byte) io.ReadBit(0x8);
+            DLC = io.ReadBit2(0x14);
+            EntityVersion = (short) io.ReadBit2(0x10);
+            ProjectVersionContext = (short) io.ReadBit2(0x10);
+            HasDebugInfo = io.ReadBoolean();
+            AgentTocBookmark = io.ReadBit2(0x1A);
+            ClientDataBookmark = io.ReadBit2(0x1A);
+            EntityContentLength = io.ReadBit2(0x20);
+            var xpos = io.Position;
+            EntityContent = new EntityData();
+            EntityContent.Read(io, this);
+            var data = io.ReadData((int) (EntityContentLength - (io.Position - xpos)));
+            SaveEntityComplexLength = io.ReadBit2(6);
+            SaveEntityComplex = io.ReadBytes(SaveEntityComplexLength, false); //usually 0x20 bits
+            SaveEntityBookmark = io.ReadBit2(0x1A);
+            AgentsEntityPass = io.ReadBit2(0x20);
+            AgentEntityData = new AgentEntity(this);
+            AgentEntityData.Read(io);
+            AgentsLookupCount = io.ReadBit2(0x4);
+            AgentLookups = new AgentLookup[AgentsLookupCount];
+            for (int i = 0; i < AgentsLookupCount; i++)
+            {
+                var x = new AgentLookup();
+                x.Agent = new int[5];
+                x.Index = (short) io.ReadBit2(0x8);
+                for (int j = 0; j < 5; j++)
+                    x.Agent[j] = io.ReadBit2(0x1A);
+                AgentLookups[i] = x;
+            }
+            EntityMeta = io.ReadBit2(0x18);
+            LookupTableCount = (short) io.ReadBit2(0x10);
+            LookupTables = new LookupTable[LookupTableCount];
+            for (int i = 0; i < LookupTableCount; i++)
+            {
+                var lk = new LookupTable();
+                lk.Id = io.ReadBit2(0x20);
+                lk.HasCreatePos = io.ReadBoolean();
+                if (lk.HasCreatePos)
+                    lk.CreatePos = io.ReadBit2(0x1A);
+                lk.HasInitPos = io.ReadBoolean();
+                if (lk.HasInitPos)
+                    lk.InitPos = io.ReadBit2(0x1A);
+                LookupTables[i] = lk;
+            }
+            InternalReferenceCount = (short) io.ReadBit2(0x10);
+            InternalReferences = new int[InternalReferenceCount];
+            for (int i = 0; i < InternalReferenceCount; i++)
+                InternalReferences[i] = io.ReadBit2(0x20);
+            ExternalReferenceCount = (short) io.ReadBit2(0x10);
+            ExternalReferences = new ExternalReference[ExternalReferenceCount];
+            for (int i = 0; i < ExternalReferenceCount; i++)
+            {
+                var x = new ExternalReference();
+                x.SubLevel = io.ReadBit2(0x18);
+                // x.Bundle = io.ReadBit2(0x18);
+                x.EntityCount = (short) io.ReadBit2(0x10);
+                x.Entities = new int[x.EntityCount];
+                for (int j = 0; j < x.EntityCount; j++)
+                    x.Entities[j] = io.ReadBit2(0x20);
+            }
+            DeletedEntityCount = (short) io.ReadBit2(0x10);
+            DeletedEntities = new int[DeletedEntityCount];
+            for (int i = 0; i < DeletedEntityCount; i++)
+                DeletedEntities[i] = io.ReadBit2(0x20);
+            AgentToc = io.ReadBit2(0x18);
+            AgentCount = io.ReadBit2(0x4);
+            Agents = new Agent[AgentCount];
+            for (int i = 0; i < AgentCount; i++)
+            {
+                var agent = new Agent();
+                agent.NameHash = io.ReadBit2(0x20);
+                agent.Index = (short) io.ReadBit2(0x8);
+                agent.Entry = (short) io.ReadBit2(0x10);
+                Agents[i] = agent;
+            }
+            ClientDataLength = io.ReadBit2(0x20);
+            var xdio = new DAIIO(io.xbaseStream, io.Position, ClientDataLength) {IsBigEndian = isbigendian};
+            ClientData = new ClientData();
+            ClientData.Read(xdio);
+        }
+
+        public void Write(ref DAIIO io)
+        {
+            io.xbaseStream.Write(DataMagic, 0, 8);
+            io.Position = 0x41;
+            io.WriteInt64(Utils.UnixTimeNow());
+            io.WriteInt16((short)SID.Length);
+            io.WriteString(SID);
+            io.WriteUInt16(GameVersion);
+            io.WriteUInt16(SaveVersion);
+            io.WriteUInt16(ProjectVersion);
+            io.WriteUInt16(BitstreamFeatures);
+            io.WriteUInt32(ChangeList);
+            io.WriteUInt16((ushort) Level.Length);
+            io.WriteString(Level);
+            io.WriteUInt32(Difficulty);
+            io.WriteUInt16(BundleCount);
+            foreach (var x in BundleList)
+            {
+                io.WriteUInt16((ushort)x.Length);
+                io.WriteString(x);
+            }
+            io.WriteUInt16(InclusionCount);
+            foreach (var x in Inclusions)
+            {
+                io.WriteInt24(x.ID);
+                io.WriteUInt16((ushort) x.Name.Length);
+                io.WriteString(x.Name);
+                io.WriteUInt16((ushort)x.Value.Length);
+                io.WriteString(x.Value);
+            }
+            io.WriteBits((uint) SubLevelInfoCount, 0xc);
+            if (SubLevelInfoCount <= 0x40 && SubLevelInfoCount > 0)
+            {
+                foreach(var x in SubLevelEntries)
+                {
+                    io.WriteInt24(x.SubLevel);
+                    io.WriteUInt16((ushort) x.Name.Length);
+                    io.WriteString(x.Name);
+                    io.WriteInt32(x.BundleHash);
+                    io.WriteInt32(x.ParentBundleHash);
+                    io.WriteBits((uint) x.HeapType, 8);
+                    io.WriteInt32(x.InitSize);
+                    io.WriteBits((uint) (x.AllowGrow ? 1 : 0), 1);
+                    io.WriteBits((uint)x.Status, 8);
+                    io.WriteBits((uint)x.BundleType, 8);
+                    io.WriteInt32(x.GroupID);
+                }
+            }
+
+            io.Write(LevelChecksum, 0, 0x10);
+            io.WriteBits((uint) DLC, 0x14);
+            io.WriteInt16(EntityVersion);
+            io.WriteInt16(ProjectVersionContext);
+            io.WriteBoolean(HasDebugInfo);
+            io.WriteBits((uint) AgentTocBookmark, 0x1A);
+            io.WriteBits((uint)ClientDataBookmark, 0x1A);
+            io.WriteBits((uint)EntityContentLength, 0x20);
+            
+            //var daio = new DAIIO(io, io.Position, EntityContentLength);
+            //int a1 = io.ReadBit2(0x1A);
+            //int a2 = io.ReadBit2(0x4);
+            //EntityContent = io.ReadBytes(EntityContentLength, false);
+
+        }
+    }
+}

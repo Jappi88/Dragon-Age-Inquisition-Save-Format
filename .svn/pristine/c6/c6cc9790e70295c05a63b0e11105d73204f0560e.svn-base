@@ -1,0 +1,68 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Dragon_Age_Inquisition_Save_Editor.DAIO;
+
+namespace Dragon_Age_Inquisition_Save_Editor.SaveData
+{
+    public class AgentEntry
+    {
+        public short Version { get; set; }
+        public int EntryOffset { get; set; }
+        public int NameHash { get; set; }
+        public bool HasCustomizationData { get; set; }
+        public CustomizationData CustomizationData { get; set; }
+    }
+
+    public class ClientAgent
+    {
+        public short Version { get; set; }
+        public int AgentCount { get; set; }
+        public AgentEntry[] Agents { get; set; }
+    }
+
+    public class ClientData
+    {
+        public List<ClientAgent> Agents { get; set; }
+
+
+        public ClientData()
+        {
+
+        }
+
+        public void Read(DAIIO io)
+        {
+            Agents = new List<ClientAgent>();
+            var x = new ClientAgent();
+            x.Version = (short) io.ReadBit2(0x10);
+            if (x.Version == 1)
+            {
+                x.AgentCount = io.ReadBit2(0x10);
+                x.Agents = new AgentEntry[x.AgentCount];
+                for (int i = 0; i < x.AgentCount; i++)
+                {
+                    var ag = new AgentEntry();
+                    ag.EntryOffset = io.ReadBit2(0x18);
+                    ag.NameHash = io.ReadBit2(0x20);
+                    ag.Version = (short) io.ReadBit2(0x10);
+                    ag.HasCustomizationData = io.ReadBoolean();
+                    if (ag.HasCustomizationData)
+                    {
+                        ag.CustomizationData = new CustomizationData();
+                        ag.CustomizationData.Read(io);
+                    }
+                    x.Agents[i] = ag;
+                }
+            }
+            else
+            {
+                //TODO:Code sub 0x83E92A98, might be useless, we wait until someone reports with this version
+            }
+        }
+
+
+    }
+}

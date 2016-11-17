@@ -1,0 +1,112 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Mail;
+using System.Text;
+
+namespace Dragon_Age_Inquisition_Save_Editor.SaveData
+{
+    public static class Utils
+    {
+        public static uint ReadUInt32(this Stream input,bool isbigendian)
+        {
+            byte[] x = new byte[4];
+            input.Read(x, 0, 4);
+            if (isbigendian)
+                Array.Reverse(x);
+            return BitConverter.ToUInt32(x, 0);
+        }
+
+        public static void WriteInt32(this Stream input,int value, bool isbigendian)
+        {
+            byte[] x = BitConverter.GetBytes(value);
+            if (isbigendian)
+                Array.Reverse(x);
+            input.Write(x, 0, x.Length);
+        }
+
+        public static void WriteUInt32(this Stream input, uint value, bool isbigendian)
+        {
+            byte[] x = BitConverter.GetBytes(value);
+            if (isbigendian)
+                Array.Reverse(x);
+            input.Write(x, 0, x.Length);
+        }
+
+        public static bool MemCompare(this byte[] data, byte[] crit, int offset)
+        {
+            if (crit == null || crit.Length == 0 || (offset + crit.Length) > data.Length)
+                return false;
+            for (int i = 0; i < crit.Length; i++)
+            {
+                if (data[offset + i] != crit[i])
+                    return false;
+            }
+            return true;
+        }
+
+        public static short ToShort(this byte[] buffer, int index, bool isbigendian)
+        {
+            var temp = new byte[2];
+            Array.Copy(buffer, index, temp, 0, 2);
+            if (isbigendian)
+                Array.Reverse(temp);
+            return BitConverter.ToInt16(temp, 0);   
+        }
+
+        public static ushort ToUShort(this byte[] buffer, int index, bool isbigendian)
+        {
+            var temp = new byte[2];
+            Array.Copy(buffer, index, temp, 0, 2);
+            if (isbigendian)
+                Array.Reverse(temp);
+            return BitConverter.ToUInt16(temp, 0);
+        }
+
+        public static int ToInt32(this byte[] buffer, int index, bool isbigendian)
+        {
+            var temp = new byte[4];
+            Array.Copy(buffer, index, temp, 0, 4);
+            if (isbigendian)
+                Array.Reverse(temp);
+            return BitConverter.ToInt32(temp, 0);
+        }
+
+        public static uint ToUInt32(this byte[] buffer, int index, bool isbigendian)
+        {
+            var temp = new byte[4];
+            Array.Copy(buffer, index, temp, 0, 4);
+            if (isbigendian)
+                Array.Reverse(temp);
+            return BitConverter.ToUInt32(temp, 0);
+        }
+
+        public static long UnixTimeNow()
+        {
+            var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
+            return (long)(timeSpan.TotalSeconds + 0x0000003118a41200);
+        }
+
+        public static long ToUnixSeconds(this DateTime time)
+        {
+            var timeSpan = (time - new DateTime(1970, 1, 1, 0, 0, 0));
+            return (long)(timeSpan.TotalSeconds + 0x0000003118a41200);
+        }
+
+        public static DateTime ToUnixTime(this long value)
+        {
+            return (new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(value - 0x0000003118a41200));
+        }
+
+        public static DateTime ToUnixTime(this int value)
+        {
+            return (new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(value));
+        }
+
+        public static int NumberOfSetBits(this int x)
+        {
+            return ((x/0x20) + ((x%0x20) == 0 ? 0 : 1));
+        }
+    }
+}

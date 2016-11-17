@@ -1,0 +1,104 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Dragon_Age_Inquisition_Save_Editor.DAIO;
+using HavenInterface.IOPackage;
+
+namespace Dragon_Age_Inquisition_Save_Editor.SaveData
+{
+    public class SaveFormat
+    {
+        #region Constants
+
+        public const uint PackageMagic = 0x4D433032;
+        public const long HeaderMagic = 0x4642484541444552;
+
+        #endregion
+
+        #region Public Properties
+        public int TotalLength { get; internal set; }
+        public int HeaderLength { get; internal set; }
+        public int DataLength { get; internal set; }
+        public byte[] Header { get; set; }
+        public SaveDataStructure DataStructure { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        public SaveFormat(string file)
+        {
+            using (var fs = new FileStream(file, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                Init(fs, Path.GetDirectoryName(file));
+            }
+        }
+
+        public SaveFormat(byte[] data,string root)
+        {
+            using (var ms = new MemoryStream(data))
+            {
+                Init(ms,root);
+            }
+        }
+
+        public SaveFormat(Stream input, string root)
+        {
+                Init(input, root);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void Init(Stream input,string root = "")
+        {
+             if (input.Length < 0x100)
+                    throw new Exception(
+                        "Invalid Savedata!\nData is too short for it to be valid, please select a valid save file");
+            using (var io = new StreamIO(input, true))
+            {
+                input.Position = 0;
+                if(io.ReadInt32() != PackageMagic)
+                    throw new Exception("Invalid Package Header!\nHeader should be MC02");
+                TotalLength = io.ReadInt32();
+                if(TotalLength != io.Length)
+                    throw new Exception("Invalid file descriptor!\nLength specified does not match the actual file length");
+                HeaderLength = io.ReadInt32();
+                if (HeaderLength > (io.Length - (io.Position + 0x14)))
+                    throw new Exception("Invalid file descriptor!\nHeaderLength specified does not match the actual header length");
+                DataLength = io.ReadInt32();
+                if (DataLength > (io.Length - ((io.Position + 0xc) + HeaderLength)))
+                    throw new Exception("Invalid file descriptor!\nDataLength specified does not match the actual data length");
+
+                io.Position += 0xc;
+                uint hash = io.ReadUInt32();
+                Header = io.ReadBytes(HeaderLength - 4);
+                var crc = new DA3CRC();
+                if(crc.Compute(Header) != hash)
+                    throw new Exception("Header data did not pass the intergrity check!\nPlease choose a valid unmodified save to proceed");
+                hash = io.ReadUInt32();
+                var data = io.ReadBytes(DataLength - 4);
+                uint xhash = crc.Compute(data);
+                if (hash != xhash)
+                    throw new Exception(
+                        "Save data did not pass the intergrity check!\nPlease choose a valid unmodified save to proceed");
+
+                var xio = new DAIIO(data) {IsBigEndian = true};
+                DataStructure = new SaveDataStructure();
+                DataStructure.Read(ref xio, true);
+                xio.Close();
+            }
+        }
+
+        public byte[] Rebuild()
+        {
+            var io = new DAIIO() {IsBigEndian = true};
+            DataStructure.Write(ref io);
+            io.Close();
+            return io.ToArray();
+        }
+
+        #endregion
+    }
+}

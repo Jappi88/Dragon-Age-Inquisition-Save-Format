@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A59872BB-F650-4C2B-AECA-15632AD784AA}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Dragon_Age_Inquisition_Save_Editor</RootNamespace>
+    <AssemblyName>Dragon Age Inquisition Save Editor</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DAIO\ConsoleRelated.cs" />
+    <Compile Include="DAIO\DAIIO.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PartyData.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaveData\AgentEntry.cs" />
+    <Compile Include="SaveData\AgentEntity.cs" />
+    <Compile Include="SaveData\AgentEntryInfo.cs" />
+    <Compile Include="SaveData\AgentLookup.cs" />
+    <Compile Include="SaveData\AgentToc.cs" />
+    <Compile Include="SaveData\ArcheType.cs" />
+    <Compile Include="SaveData\BluePrint.cs" />
+    <Compile Include="SaveData\BodyShaderHandles.cs" />
+    <Compile Include="SaveData\BoneOffsetEntryV1.cs" />
+    <Compile Include="SaveData\BoneOffsetEntryV2.cs" />
+    <Compile Include="SaveData\BoneOffsetsV1.cs" />
+    <Compile Include="SaveData\BoneOffsetsV2.cs" />
+    <Compile Include="SaveData\BooleanFlags.cs" />
+    <Compile Include="SaveData\BWMapManager.cs" />
+    <Compile Include="SaveData\CallBackData.cs" />
+    <Compile Include="SaveData\CharacterCustomization.cs" />
+    <Compile Include="SaveData\CharacterCustomizationManager.cs" />
+    <Compile Include="SaveData\ClientAgent.cs" />
+    <Compile Include="SaveData\CompositionDisplay.cs" />
+    <Compile Include="SaveData\Controllable.cs" />
+    <Compile Include="SaveData\ControllableCreate.cs" />
+    <Compile Include="SaveData\CraftedItemStats.cs" />
+    <Compile Include="SaveData\CraftedStatInstance.cs" />
+    <Compile Include="SaveData\CraftedStatIntances.cs" />
+    <Compile Include="SaveData\Customization.cs" />
+    <Compile Include="SaveData\CustomizationData.cs" />
+    <Compile Include="DAIO\DA3CRC.cs" />
+    <Compile Include="SaveData\DA3PartyMemberDataCache.cs" />
+    <Compile Include="SaveData\DAInterface.cs" />
+    <Compile Include="SaveData\DataCache.cs" />
+    <Compile Include="SaveData\DynamicLootOwners.cs" />
+    <Compile Include="SaveData\DynamicMapPinInfo.cs" />
+    <Compile Include="SaveData\DynamicPinsMap.cs" />
+    <Compile Include="SaveData\DynamicPinsMaps.cs" />
+    <Compile Include="SaveData\EntityData.cs" />
+    <Compile Include="SaveData\EntityMeta.cs" />
+    <Compile Include="SaveData\Event.cs" />
+    <Compile Include="SaveData\ExternalReference.cs" />
+    <Compile Include="SaveData\FogArchive.cs" />
+    <Compile Include="SaveData\HeadVariation.cs" />
+    <Compile Include="SaveData\HeadVariations.cs" />
+    <Compile Include="SaveData\ImpactEntityDestructionComplex.cs" />
+    <Compile Include="SaveData\Inclusion.cs" />
+    <Compile Include="SaveData\InVehicleControllable.cs" />
+    <Compile Include="SaveData\Inventory.cs" />
+    <Compile Include="SaveData\ItemAbilities.cs" />
+    <Compile Include="SaveData\ItemAsset.cs" />
+    <Compile Include="SaveData\ItemDynamicStats.cs" />
+    <Compile Include="SaveData\ItemEntry.cs" />
+    <Compile Include="SaveData\ItemMaterial.cs" />
+    <Compile Include="SaveData\ItemMaterials.cs" />
+    <Compile Include="SaveData\ItemStatInstance.cs" />
+    <Compile Include="SaveData\ItemStatsData.cs" />
+    <Compile Include="SaveData\ItemStatsInstance.cs" />
+    <Compile Include="SaveData\ItemTimelines.cs" />
+    <Compile Include="SaveData\ItemUpgrade.cs" />
+    <Compile Include="SaveData\ItemUpgrades.cs" />
+    <Compile Include="SaveData\JournalManager.cs" />
+    <Compile Include="SaveData\LookupTable.cs" />
+    <Compile Include="SaveData\LootManager.cs" />
+    <Compile Include="SaveData\LootMap.cs" />
+    <Compile Include="SaveData\LootOwner.cs" />
+    <Compile Include="SaveData\Map.cs" />
+    <Compile Include="SaveData\MapPins.cs" />
+    <Compile Include="SaveData\MasterInfo.cs" />
+    <Compile Include="SaveData\MissionArray.cs" />
+    <Compile Include="SaveData\MissionManager.cs" />
+    <Compile Include="SaveData\OwnerInfo.cs" />
+    <Compile Include="SaveData\PartDestructionComplex.cs" />
+    <Compile Include="SaveData\PartyManager.cs" />
+    <Compile Include="SaveData\PartyMember.cs" />
+    <Compile Include="SaveData\PartyMemberDataCache.cs" />
+    <Compile Include="SaveData\PartyPlayerManager.cs" />
+    <Compile Include="SaveData\PersistentLoot.cs" />
+    <Compile Include="SaveData\PlayerManager.cs" />
+    <Compile Include="SaveData\PlotFlagValueMap.cs" />
+    <Compile Include="SaveData\PlotSaveGame.cs" />
+    <Compile Include="SaveData\PotionBank.cs" />
+    <Compile Include="SaveData\SaveDataStructure.cs" />
+    <Compile Include="SaveData\SaveEntity.cs" />
+    <Compile Include="SaveData\SaveFormat.cs" />
+    <Compile Include="SaveData\SpawnedGhost.cs" />
+    <Compile Include="SaveData\Spawner.cs" />
+    <Compile Include="SaveData\SpawnerControllable.cs" />
+    <Compile Include="SaveData\SpawnerCreate.cs" />
+    <Compile Include="SaveData\SpawnerCreateManager.cs" />
+    <Compile Include="SaveData\SpawnerInit.cs" />
+    <Compile Include="SaveData\SpawnerInits.cs" />
+    <Compile Include="SaveData\StateHistory.cs" />
+    <Compile Include="SaveData\StoreInventories.cs" />
+    <Compile Include="SaveData\StoreInventory.cs" />
+    <Compile Include="SaveData\StoreInventoryManager.cs" />
+    <Compile Include="SaveData\StoreItemEntry.cs" />
+    <Compile Include="SaveData\SubLevelInfo.cs" />
+    <Compile Include="SaveData\Terrain.cs" />
+    <Compile Include="SaveData\TerrainManager.cs" />
+    <Compile Include="SaveData\TerrainPart.cs" />
+    <Compile Include="SaveData\TextureShader.cs" />
+    <Compile Include="SaveData\TextureShaderParam.cs" />
+    <Compile Include="SaveData\Utils.cs" />
+    <Compile Include="SaveData\ValueFlag.cs" />
+    <Compile Include="SaveData\VectorShader.cs" />
+    <Compile Include="SaveData\VectorShaderParam.cs" />
+    <Compile Include="SaveData\WarTable.cs" />
+    <Compile Include="SaveData\WarTableEntry.cs" />
+    <Compile Include="SaveData\WorldStateManager.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

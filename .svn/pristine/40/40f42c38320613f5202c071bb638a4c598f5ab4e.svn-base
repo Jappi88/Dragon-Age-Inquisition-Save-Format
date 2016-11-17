@@ -1,0 +1,1516 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Dragon_Age_Inquisition_Save_Editor.DAIO;
+using Telerik.Pdf;
+using Telerik.WinControls.Layout;
+using Telerik.WinControls.UI;
+
+namespace Dragon_Age_Inquisition_Save_Editor.SaveData
+{
+    public class StateHistory
+    {
+        public int Complex { get; set; }
+        public string Name { get; set; }
+        public byte[] Hash { get; set; }
+
+        public StateHistory Read(DAIIO io)
+        {
+            Complex = io.ReadBit2(0x18);
+            var count = (ushort)io.ReadBit(0x10);
+            Name = io.ReadString(count);
+            count = (ushort)io.ReadBit(0x10);
+            Hash = new byte[count];
+            io.Read(Hash, 0, count);
+            return this;
+        }
+    }
+
+    public class PartyMember
+    {
+        public int Complex { get; set; }
+        public int PartyMemberID { get; set; }
+        public byte FixedIndex { get; set; }
+        public int Player { get; set; }
+        public bool IsLeader { get; set; }
+        public bool IsUnspawned { get; set; }
+    }
+
+    public class PartyManager
+    {
+        public int BWPartyManager { get; set; }
+        public int PartyData { get; set; }
+        public short ArcheTypeCount { get; set; }
+        public ArcheType[] ArcheTypes { get; set; }
+        public short DesiredPartyMemberIDCount { get; set; }
+        public int[] DesiredPartyMemberIDs { get; set; }
+
+        public short OverridePartyMemberIDCount { get; set; }
+        public int[] OverridePartyMemberIDs { get; set; }
+
+        public short PartyMemberCount { get; set; }
+        public PartyMember[] PartyMembers { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            BWPartyManager = io.ReadBit2(0x18);
+            PartyData = io.ReadBit2(0x18);
+            ArcheTypeCount = io.ReadInt16();
+            ArcheTypes = new ArcheType[ArcheTypeCount];
+            for (int i = 0; i < ArcheTypeCount; i++)
+            {
+                var x = new ArcheType();
+                x.Complex = io.ReadBit2(0x18);
+                x.ArcheTypeID = io.ReadInt32();
+                x.Enabled = io.ReadBoolean();
+                x.Unlocked = io.ReadBoolean();
+                ArcheTypes[i] = x;
+            }
+            DesiredPartyMemberIDCount = io.ReadInt16();
+            DesiredPartyMemberIDs = new int[DesiredPartyMemberIDCount];
+            for (int i = 0; i < DesiredPartyMemberIDCount; i++)
+                DesiredPartyMemberIDs[i] = io.ReadInt32();
+            OverridePartyMemberIDCount = io.ReadInt16();
+            OverridePartyMemberIDs = new int[OverridePartyMemberIDCount];
+            for (int i = 0; i < OverridePartyMemberIDCount; i++)
+                OverridePartyMemberIDs[i] = io.ReadInt32();
+
+            PartyMemberCount = io.ReadInt16();
+            PartyMembers = new PartyMember[PartyMemberCount];
+            for (int i = 0; i < PartyMemberCount; i++)
+            {
+                var x = new PartyMember();
+                x.Complex = io.ReadBit2(0x18);
+                x.PartyMemberID = io.ReadInt32();
+                x.FixedIndex = (byte) io.ReadBit2(8);
+                x.Player = io.ReadInt32();
+                x.IsLeader = io.ReadBoolean();
+                x.IsUnspawned = io.ReadBoolean();
+                PartyMembers[i] = x;
+            }
+        }
+    }
+
+    public class BooleanFlags
+    {
+        public short Count { get; set; }
+        public byte[][] Guids { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Count = io.ReadInt16();
+            Guids = new byte[Count][];
+            for (int i = 0; i < Count; i++)
+            {
+                Guids[i] = new byte[0x10];
+                for (int j = 0; j < 0x10; j++)
+                    Guids[i][j] = (byte) io.ReadBit(0x8);
+            }
+        }
+
+    }
+
+    public class ArcheType
+    {
+        public int Complex { get; set; }
+        public int ArcheTypeID { get; set; }
+        public bool Enabled { get; set; }
+        public bool Unlocked { get; set; }
+    }
+
+    public class ValueFlag
+    {
+        public int Complex { get; set; }
+        public byte[] Guid { get; set; }
+        public int Value { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Guid = new byte[0x10];
+            for (int j = 0; j < 0x10; j++)
+                Guid[j] = (byte)io.ReadBit(0x8);
+            Value = io.ReadInt32();
+        }
+    }
+
+    public class PlotFlagValueMap
+    {
+        public int Length { get; set; }
+        public short Version { get; set; }
+        public short MarkerDataLength { get; set; }
+        public string MarkerData { get; set; }
+        public BooleanFlags BooleanFlagsThatAreTrue { get; set; }
+        public BooleanFlags BooleanFlagsThatAreFalse { get; set; }
+        public short IntegerFlagsCount { get; set; }
+        public ValueFlag[] IntegerFlags { get; set; }
+        public short FloatFlagsCount { get; set; }
+        public ValueFlag[] FloatFlags { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Version = io.ReadInt16();
+            if ((Version & 0xFFFF) >= 2)
+            {
+                MarkerDataLength = io.ReadInt16();
+                MarkerData = io.ReadString(MarkerDataLength);
+            }
+            if ((Version & 0xFFFF) >= 1)
+            {
+                BooleanFlagsThatAreTrue = new BooleanFlags();
+                BooleanFlagsThatAreTrue.Read(io);
+
+                BooleanFlagsThatAreFalse = new BooleanFlags();
+                BooleanFlagsThatAreFalse.Read(io);
+
+                IntegerFlagsCount = io.ReadInt16();
+                IntegerFlags = new ValueFlag[IntegerFlagsCount];
+                for (int i = 0; i < IntegerFlagsCount; i++)
+                {
+                    IntegerFlags[i] = new ValueFlag();
+                    IntegerFlags[i].Read(io);
+                }
+
+                FloatFlagsCount = io.ReadInt16();
+                FloatFlags = new ValueFlag[FloatFlagsCount];
+                for (int i = 0; i < FloatFlagsCount; i++)
+                {
+                    FloatFlags[i] = new ValueFlag();
+                    FloatFlags[i].Read(io);
+                }
+            }
+        }
+    }
+
+    public class PlotSaveGame
+    {
+        public int Length { get; set; }
+        public PlotFlagValueMap PlotFlagValueMap { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            PlotFlagValueMap = new PlotFlagValueMap();
+            PlotFlagValueMap.Read(io);
+        }
+    }
+
+    public class LootMap
+    {
+        public int PersistentLevelLoot { get; set; }
+        public int LevelId { get; set; }
+        public int BufferSize { get; set; }
+        public byte[] Buffer { get; set; }
+    }
+
+    public class PersistentLoot
+    {
+        public int Length { get; set; }
+        public short LootMapCount { get; set; }
+        public LootMap[] LootMaps { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            LootMapCount = io.ReadInt16();
+            LootMaps = new LootMap[LootMapCount];
+            for (int i = 0; i < LootMapCount; i++)
+            {
+                var x = new LootMap();
+                x.PersistentLevelLoot = io.ReadBit2(0x18);
+                x.LevelId = io.ReadBit2(0x20);
+                x.BufferSize = io.ReadBit2(0x20);
+                x.Buffer = new byte[x.BufferSize];
+                for(int j = 0; j < x.BufferSize; j++)
+                    x.Buffer[j] = (byte) io.ReadBit(0x8);
+                LootMaps[i] = x;
+            }
+        }
+    }
+
+    public class BluePrint
+    {
+        public bool IsNotValid { get; set; }
+        public int Value1 { get; set; }
+        public int Value2 { get; set; }
+        public bool HasGuid { get; set; }
+        public byte[] Guid { get; set; }
+
+        public BluePrint Read(DAIIO io)
+        {
+            IsNotValid = io.ReadBoolean();
+            if (!IsNotValid)
+            {
+                Value1 = io.ReadInt32();
+                Value2 = io.ReadInt32();
+                HasGuid = io.ReadBoolean();
+                if (HasGuid)
+                {
+                    Guid = new byte[0x10];
+                    for (int i = 0; i < 0x10; i++)
+                        Guid[i] = (byte) io.ReadByte();
+                }
+            }
+            return this;
+        }
+    }
+
+    public class ItemAsset
+    {
+        public bool IsNotValid { get; set; }
+        public int Value1 { get; set; }
+        public int Value2 { get; set; }
+        public bool HasNoGuid { get; set; }
+        public byte[] Guid { get; set; }
+
+        public ItemAsset Read(DAIIO io)
+        {
+            IsNotValid = io.ReadBoolean();
+            if (!IsNotValid)
+            {
+                Value1 = io.ReadInt32();
+                Value2 = io.ReadInt32();
+                HasNoGuid = io.ReadBoolean();
+                if (!HasNoGuid)
+                {
+                    Guid = new byte[0x10];
+                    for (int i = 0; i < 0x10; i++)
+                        Guid[i] = (byte)io.ReadByte();
+                }
+            }
+            return this;
+        }
+    }
+
+    public class LootOwner
+    {
+        public int Complex { get; set; }
+        public BluePrint BluePrint { get; set; }
+        public int IndexUsedByUniqueId { get; set; }
+        public byte[][] TransForm { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Complex = io.ReadBit2(0x18);
+            BluePrint = new BluePrint().Read(io);
+            IndexUsedByUniqueId = io.ReadInt32();
+            TransForm = new byte[4][];
+            for (int i = 0; i < 4; i++)
+            {
+                TransForm[i] = new byte[0xc];
+                for (int j = 0; j < 0xc; j++)
+                    TransForm[i][j] = (byte) io.ReadByte();
+            }
+        }
+
+    }
+
+    public class DynamicLootOwners
+    {
+        public int Length { get; set; }
+        public int NextUid { get; set; }
+        public short LootOwnersCount { get; set; }
+        public LootOwner[] LootOwners { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            NextUid = io.ReadBit2(0x20);
+            LootOwnersCount = io.ReadInt16();
+            LootOwners = new LootOwner[LootOwnersCount];
+            for (int i = 0; i < LootOwnersCount; i++)
+            {
+                var x =new LootOwner();
+                x.Read(io);
+                LootOwners[i] = x;
+            }
+        }
+    }
+
+    public class LootManager
+    {
+        public SaveDataStructure SStStructure { get; private set; }
+        public int Length { get; set; }
+        public short Version { get; set; }
+        public PersistentLoot PersistentLoot { get; set; }
+        public DynamicLootOwners DynamicLootOwners { get; set; }
+
+        public LootManager(SaveDataStructure strx)
+        {
+            SStStructure = strx;
+        }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Version = io.ReadInt16();
+            if (Version > 2)
+            {
+                PersistentLoot = new PersistentLoot();
+                PersistentLoot.Read(io);
+                DynamicLootOwners = new DynamicLootOwners();
+                DynamicLootOwners.Read(io);
+            }
+        }
+    }
+
+    public class Controllable
+    {
+        public bool ShouldSave { get; set; }
+        public bool IsHuman { get; set; }
+        public bool HasPlayer { get; set; }
+        public int PlayerID { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            ShouldSave = io.ReadBoolean();
+            if (ShouldSave)
+            {
+                IsHuman = io.ReadBoolean();
+                HasPlayer = io.ReadBoolean();
+                if (HasPlayer)
+                    PlayerID = io.ReadInt32();
+            }
+        }
+    }
+
+    public class ControllableCreate
+    {
+        public short Length { get; set; }
+        public bool HasControllable { get; set; }
+        public Controllable Controllable { get; set; }
+        public byte[][] TransForm { get; set; }
+        public short IndexUsedByUniqueId { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadInt16();
+            HasControllable = io.ReadBoolean();
+            if (HasControllable)
+            {
+                Controllable = new Controllable();
+                Controllable.Read(io);
+                if (Controllable.ShouldSave)
+                {
+                    TransForm = new byte[4][];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        TransForm[i] = new byte[0xc];
+                        for (int j = 0; j < 0xc; j++)
+                            TransForm[i][j] = (byte)io.ReadByte();
+                    }
+                    IndexUsedByUniqueId = io.ReadInt16();
+                }
+            }
+        }
+    }
+
+    public class SpawnerCreate
+    {
+        public int Length { get; set; }
+        public int ID { get; set; }
+        public short ControllablesCount { get; set; }
+        public ControllableCreate[] Controllables { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x14);
+            ID = io.ReadBit2(0x20);
+            ControllablesCount = io.ReadInt16();
+            Controllables = new ControllableCreate[ControllablesCount];
+            for (int i = 0; i < ControllablesCount; i++)
+            {
+                var x = new ControllableCreate();
+                x.Read(io);
+                Controllables[i] = x;
+            }
+        }
+    }
+
+    public class SpawnerCreateManager
+    {
+        public int Length { get; set; }
+        public short SpawnerCreateCount { get; set; }
+        public SpawnerCreate[] SpawnerCreates { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            SpawnerCreateCount = io.ReadInt16();
+            SpawnerCreates = new SpawnerCreate[SpawnerCreateCount];
+            for (int i = 0; i < SpawnerCreateCount; i++)
+            {
+                var x = new SpawnerCreate();
+                x.Read(io);
+                SpawnerCreates[i] = x;
+            }
+        }
+    }
+
+    public class Map
+    {
+        public int Complex { get; set; }
+        public int MapID { get; set; }
+        public bool IsPersistent { get; set; }
+        public int UncompressedSize { get; set; }
+        public bool IsCompressed { get; set; }
+        public int Size { get; set; }
+        public byte[] Blob { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Complex = io.ReadBit2(0x18);
+            MapID = io.ReadInt32();
+            IsPersistent = io.ReadBoolean();
+            UncompressedSize = io.ReadInt32();
+            IsCompressed = io.ReadBoolean();
+            Size = io.ReadInt32();
+            Blob = new byte[Size];
+            for (int i = 0; i < Size; i++)
+                Blob[i] = (byte) io.ReadBit(0x8);
+        }
+    }
+
+    public class FogArchive
+    {
+        public int Length { get; set; }
+        public short MapCount { get; set; }
+        public Map[] Maps { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            MapCount = io.ReadInt16();
+            Maps = new Map[MapCount];
+            for (int i = 0; i < MapCount; i++)
+            {
+                var x = new Map();
+                x.Read(io);
+                Maps[i] = x;
+            }
+        }
+    }
+
+    public class DynamicMapPinInfo
+    {
+        public short Length { get; set; }
+        public byte[] PinGuid { get; set; }
+        public byte[] WorldPos { get; set; }
+        public short FloorId { get; set; }
+        public bool VisibilityOverridden { get; set; }
+        public bool Visible { get; set; }
+        public bool DisplayAsDiscovered { get; set; }
+        public bool DisplayAsExplored { get; set; }
+        public bool DeadOrDying { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Length = (short) io.ReadBit2(0xA);
+            PinGuid = new byte[0x10];
+            io.Read(PinGuid, 0, 0x10);
+            WorldPos = new byte[0xc];
+            io.Read(WorldPos, 0, 0xc);
+            FloorId = io.ReadInt16();
+            VisibilityOverridden = io.ReadBoolean();
+            if (VisibilityOverridden)
+                Visible = io.ReadBoolean();
+            DisplayAsDiscovered = io.ReadBoolean();
+            DisplayAsExplored = io.ReadBoolean();
+            DeadOrDying = io.ReadBoolean();
+        }
+    }
+
+    public class MapPins
+    {
+        public short PinIdCount { get; set; }
+        public int[] PinIds { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            PinIdCount = io.ReadInt16();
+            PinIds = new int[PinIdCount];
+            for (int i = 0; i < PinIdCount; i++)
+                PinIds[i] = io.ReadInt32();
+        }
+    }
+
+    public class DynamicPinsMap
+    {
+        public int Complex { get; set; }
+        public byte[] MapGuid { get; set; }
+        public short PinsCount { get; set; }
+        public DynamicMapPinInfo[] Pins { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Complex = io.ReadBit2(0x18);
+            MapGuid = new byte[0x10];
+            io.Read(MapGuid, 0, 0x10);
+            PinsCount = io.ReadInt16();
+            Pins = new DynamicMapPinInfo[PinsCount];
+            for (int i = 0; i < PinsCount; i++)
+            {
+                var x = new DynamicMapPinInfo();
+                x.Read(io);
+                Pins[i] = x;
+            }
+        }
+    }
+
+    public class DynamicPinsMaps
+    {
+        public short Count { get; set; }
+        public DynamicPinsMap[] Pins { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Count = io.ReadInt16();
+            Pins = new DynamicPinsMap[Count];
+            for (int i = 0; i < Count; i++)
+            {
+                var x = new DynamicPinsMap();
+                x.Read(io);
+                Pins[i] = x;
+            }
+        }
+    }
+
+    public class BWMapManager
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public int UserWaypoint_MapId { get; set; }
+        public byte[] UserWaypoint_WorldPos { get; set; }
+        public FogArchive FogArchive { get; set; }
+        public DynamicPinsMaps DynamicPinsMaps { get; set; }
+        public MapPins DiscoveredPins { get; set; }
+        public MapPins ExploredPins { get; set; }
+
+        public void Read(DAIIO io, SaveDataStructure xstruc)
+        {
+            SStructure = xstruc;
+            Length = io.ReadBit2(0x18);
+            //if(6 (<-????) > 5)
+            //{ 
+            UserWaypoint_MapId = io.ReadInt32();
+            UserWaypoint_WorldPos = new byte[8];
+            for (int i = 0; i < 8; i++)
+                UserWaypoint_WorldPos[i] = (byte) io.ReadBit(0x8);
+            FogArchive = new FogArchive();
+            FogArchive.Read(io);
+            DynamicPinsMaps = new DynamicPinsMaps();
+            DynamicPinsMaps.Read(io);
+            DiscoveredPins = new MapPins();
+            DiscoveredPins.Read(io);
+            ExploredPins = new MapPins();
+            ExploredPins.Read(io);
+            //}
+        }
+    }
+
+    public class WarTableEntry
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Mission { get; set; }
+        public bool IsEmpty { get; set; }
+        public int Complex { get; set; }
+        public int ID { get; set; }
+        public bool HasNoGuid { get; set; }
+        public byte[] Guid { get; set; }
+        public DateTime ProgressTime { get; set; }
+
+        public WarTableEntry(SaveDataStructure xstruc)
+        {
+            SStructure = xstruc;
+        }
+
+        public WarTableEntry Read(DAIIO io, bool isfirst)
+        {
+            Mission = io.ReadBit2(0x18);
+            IsEmpty = io.ReadBoolean();
+            if (!IsEmpty)
+            {
+                Complex = io.ReadInt32();
+                ID = io.ReadInt32();
+                HasNoGuid = io.ReadBoolean();
+                if (!HasNoGuid)
+                {
+                    Guid = new byte[0x10];
+                    io.Read(Guid, 0, 0x10);
+                }
+            }
+            if (isfirst)
+            {
+                if (SStructure.ProjectVersion < 0x1A)
+                    ProgressTime = io.ReadInt32().ToUnixTime();
+                else ProgressTime = ((int) io.ReadInt64()).ToUnixTime();
+            }
+            return this;
+        }
+    }
+
+    public class MissionArray
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Complex { get; set; }
+        public int Index { get; set; }
+
+        public WarTableEntry WarTableEntry { get; set; }
+
+        public MissionArray(SaveDataStructure xstruc)
+        {
+            SStructure = xstruc;
+        }
+
+        public MissionArray Read(DAIIO io, bool isfirst)
+        {
+            Complex = io.ReadBit2(0x18);
+            if (isfirst)
+                Index = io.ReadInt32();
+            WarTableEntry = new WarTableEntry(SStructure).Read(io,isfirst);
+            return this;
+        }
+
+    }
+
+    public class MissionManager
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public int InProgress { get; set; }
+        public int MissionArraySize { get; set; }
+        public int MissionArray0Count { get; set; }
+        public MissionArray[] MissionArray0 { get; set; }
+        public int MissionArray1Count { get; set; }
+        public MissionArray[] MissionArray1 { get; set; }
+        public int Completed { get; set; }
+
+        public MissionManager(SaveDataStructure xstruc)
+        {
+            SStructure = xstruc;
+        }
+
+        public void Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            InProgress = io.ReadBit2(0x18);
+            MissionArraySize = io.ReadInt32();
+            MissionArray0Count = io.ReadInt16();
+            MissionArray0 = new MissionArray[MissionArray0Count];
+            for (int i = 0; i < MissionArray0Count; i++)
+                MissionArray0[i] = new MissionArray(SStructure).Read(io,true);
+
+            Completed = io.ReadBit2(0x18);
+
+            MissionArray1Count = io.ReadInt16();
+            MissionArray1 = new MissionArray[MissionArray1Count];
+            for (int i = 0; i < MissionArray1Count; i++)
+                MissionArray1[i] = new MissionArray(SStructure).Read(io, false);
+        }
+    }
+
+    public class WorldStateManager
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public short StateHistoryCount { get; set; }
+        public StateHistory[] StateHistories { get; set; }
+
+        public WorldStateManager(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public WorldStateManager Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            StateHistoryCount = io.ReadInt16();;
+            StateHistories = new StateHistory[StateHistoryCount];
+            for (int i = 0; i < StateHistoryCount; i++)
+                StateHistories[i] = new StateHistory().Read(io);
+            return this;
+        }
+    }
+
+    public class InVehicleControllable
+    {
+        public int ID { get; set; }
+        public int EntryID { get; set; }
+    }
+
+    public class SpawnerControllable
+    {
+        public short Length { get; set; }
+        public bool IsInVehicle { get; set; }
+        public InVehicleControllable InVehicleControllable { get; set; }
+
+        public SpawnerControllable Read(DAIIO io)
+        {
+            Length = io.ReadInt16();
+            IsInVehicle = io.ReadBoolean();
+            if (IsInVehicle)
+            {
+                InVehicleControllable = new InVehicleControllable()
+                {
+                    ID = io.ReadInt32(),
+                    EntryID = io.ReadInt32()
+                };
+            }
+            return this;
+        }
+    }
+
+    public class Spawner
+    {
+        public int ID { get; set; }
+        public short ControllableCount { get; set; }
+        public SpawnerControllable[] Controllables { get; set; }
+
+        public Spawner Read(DAIIO io)
+        {
+            ID = io.ReadInt32();
+            ControllableCount = (short) io.ReadBit2(0xA);
+            Controllables = new SpawnerControllable[ControllableCount];
+            for (int i = 0; i < ControllableCount; i++)
+                Controllables[i] = new SpawnerControllable().Read(io);
+            return this;
+        }
+    }
+
+    public class SpawnerInit
+    {
+        public int Length { get; set; }
+        public Spawner Spawner { get; set; }
+
+        public SpawnerInit Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x14);
+            Spawner = new Spawner().Read(io);
+            return this;
+        }
+    }
+
+    public class SpawnerInits
+    {
+        public int Length { get; set; }
+        public short Count { get; set; }
+        public SpawnerInit[] Inits { get; set; }
+
+        public SpawnerInits Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Count = io.ReadInt16();
+            Inits = new SpawnerInit[Count];
+            for (int i = 0; i < Count; i++)
+                Inits[i] = new SpawnerInit().Read(io);
+            return this;
+        }
+    }
+
+    public class MasterInfo
+    {
+        public short DestructionInfoCount { get; set; }
+        public byte[][] PosAndImpacts { get; set; }
+
+        public MasterInfo Read(DAIIO io)
+        {
+            DestructionInfoCount = io.ReadInt16();
+            PosAndImpacts = new byte[DestructionInfoCount][];
+            for (int i = 0; i < DestructionInfoCount; i++)
+            {
+                PosAndImpacts[i] = new byte[0x10];
+                io.Read(PosAndImpacts[i], 0, 0x10);
+            }
+            return this;
+        }
+    }
+
+    public class ImpactEntityDestructionComplex
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public byte PositionPrecision { get; set; }
+        public short PositionCompressionArray { get; set; }
+        public byte[] PositionCompression { get; set; }
+        public byte ImpactPrecision { get; set; }
+        public int ImpactScale { get; set; }
+        public int NextCallbackId { get; set; }
+        public MasterInfo[] MasterInfoArray { get; set; }
+        public int LastDestructionId { get; set; }
+
+        public ImpactEntityDestructionComplex(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public ImpactEntityDestructionComplex Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            PositionPrecision = (byte) io.ReadBit2(0x8);
+            PositionCompressionArray = io.ReadInt16();
+            PositionCompression = new byte[PositionCompressionArray];
+            for(int i = 0; i < PositionCompressionArray; i++)
+                PositionCompression[i] = (byte) io.ReadBit2(0x8);
+            ImpactPrecision = (byte) io.ReadBit2(8);
+            ImpactScale = io.ReadInt32();
+            NextCallbackId = io.ReadInt32();
+            MasterInfoArray = new MasterInfo[NextCallbackId];
+            for (int i = 0; i < NextCallbackId; i++)
+                MasterInfoArray[i] = new MasterInfo().Read(io);
+            LastDestructionId = io.ReadInt32();
+                return this;
+        }
+    }
+
+    public class CallBackData
+    {
+        public int Length { get; set; }
+        public int Id { get; set; }
+        public int DestroyedPartsCount { get; set; }
+        public bool KeepInfoOnUnregister { get; set; }
+        public short PartIdsCount { get; set; }
+        public int[] PartIds { get; set; }
+        public int BitCount { get; set; }
+        public byte[] BitArray { get; set; }
+
+        public CallBackData Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Id = io.ReadInt32();
+            DestroyedPartsCount = io.ReadInt32();
+            KeepInfoOnUnregister = io.ReadBoolean();
+            PartIdsCount = io.ReadInt16();
+            PartIds = new int[PartIdsCount];
+            for (int i = 0; i < PartIdsCount; i++)
+                PartIds[i] = io.ReadInt32();
+            BitCount = io.ReadInt32();
+            int x = BitCount.NumberOfSetBits() << 2;
+            BitArray = new byte[x];
+            io.Read(BitArray, 0, x);
+            return this;
+        }
+    }
+
+    public class OwnerInfo
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public int Id { get; set; }
+        public short CallbackCount { get; set; }
+        public  CallBackData[] Callbacks { get; set; }
+
+        public OwnerInfo(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public OwnerInfo Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Id = io.ReadInt32();
+            CallbackCount = io.ReadInt16();
+            Callbacks = new CallBackData[CallbackCount];
+            for (int i = 0; i < CallbackCount; i++)
+                Callbacks[i] = new CallBackData().Read(io);
+            return this;
+        }
+    }
+
+    public class PartDestructionComplex
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public short OwnerInfoCount { get; set; }
+        public OwnerInfo[] OwnerInfos { get; set; }
+
+        public PartDestructionComplex(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public PartDestructionComplex Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            OwnerInfoCount = io.ReadInt16();
+            OwnerInfos = new OwnerInfo[OwnerInfoCount];
+            for (int i = 0; i < OwnerInfoCount; i++)
+                OwnerInfos[i] = new OwnerInfo(SStructure).Read(io);
+            return this;
+        }
+    }
+
+    public class TerrainPart
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public PartDestructionComplex DestructionComplex { get; set; }
+
+        public TerrainPart(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public TerrainPart Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            if (SStructure.SaveVersion >= 0x11)
+                DestructionComplex = new PartDestructionComplex(SStructure).Read(io);
+            return this;
+        }
+    }
+
+    public class Terrain
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public ImpactEntityDestructionComplex ImpactEntityDestructionComplex { get; set; }
+        public TerrainPart Part { get; set; }
+
+        public Terrain(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public Terrain Read(DAIIO io)
+        {
+            bool flag = SStructure.SaveVersion < 0x11;
+            Length = io.ReadBit2(0x18);
+            ImpactEntityDestructionComplex = new ImpactEntityDestructionComplex(SStructure).Read(io);
+            Part = new TerrainPart(SStructure).Read(io);
+            return this;
+        }
+    }
+
+    public class TerrainManager
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public Terrain Terrain { get; set; }
+
+        public TerrainManager(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public TerrainManager Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Terrain = new Terrain(SStructure).Read(io);
+            return this;
+        }
+    }
+
+    public class StoreItemEntry
+    {
+        public int ItemData { get; set; }
+        public int NameHash { get; set; }
+        public int Quantity { get; set; }
+
+        public StoreItemEntry Read(DAIIO io)
+        {
+            ItemData = io.ReadBit2(0x18);
+            NameHash = io.ReadInt32();
+            Quantity = io.ReadInt32();
+            return this;
+        }
+    }
+
+    public class StoreInventory
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public int storeEntitySaveUid { get; set; }
+        public short ItemCount { get; set; }
+        public StoreItemEntry[] Items { get; set; }
+
+        public StoreInventory(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public StoreInventory Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            storeEntitySaveUid = io.ReadInt32();
+            ItemCount = io.ReadInt16();
+            Items = new StoreItemEntry[ItemCount];
+            for (int i = 0; i < ItemCount; i++)
+                Items[i] = new StoreItemEntry().Read(io);
+            return this;
+        }
+    }
+
+    public class StoreInventories
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public int Version { get; set; }
+        public short InventoryCount { get; set; }
+        public StoreInventory[] Inventories { get; set; }
+
+        public StoreInventories(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public StoreInventories Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Version = io.ReadInt32();
+            InventoryCount = io.ReadInt16();
+            Inventories = new StoreInventory[InventoryCount];
+            for (int i = 0; i < InventoryCount; i++)
+                Inventories[i] = new StoreInventory(SStructure).Read(io);
+            return this;
+        }
+    }
+
+    public class StoreInventoryManager
+    {
+         public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public StoreInventories StoreInventories { get; set; }
+
+        public StoreInventoryManager(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public StoreInventoryManager Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            StoreInventories = new StoreInventories(SStructure).Read(io);
+            return this;
+        }
+    }
+
+    public class ItemStatInstance
+    {
+        public bool HasDynamicStats { get; set; }
+        public ItemDynamicStats DynamicStats { get; set; }
+        public ItemEntry Item { get; private set; }
+        public CraftedStatIntances CraftedStatIntances { get; set; }
+        public ItemAbilities ItemAbilities { get; set; }
+        public ItemTimelines ItemTimelines { get; set; }
+        public ItemMaterials ItemMaterials { get; set; }
+        public string DisplayString { get; set; }
+        public CompositionDisplay CompositionDisplay { get; set; }
+        public int Level { get; set; }
+        public int DamageType { get; set; }
+        public int Quality { get; set; }
+
+        public ItemStatInstance(ItemEntry item)
+        {
+            Item = item;
+        }
+
+        public ItemStatInstance Read(DAIIO io)
+        {
+            if (Item.Version > 1)
+            {
+                HasDynamicStats = io.ReadBoolean();
+                if (HasDynamicStats)
+                    DynamicStats = new ItemDynamicStats().Read(io);
+                else
+                    if(Item.Version > 3)
+                        DynamicStats = new ItemDynamicStats().Read(io);
+            }
+            else
+                if (Item.IsCrafted)
+                    CraftedStatIntances = new CraftedStatIntances().Read(io);
+            if (Item.Version > 9)
+                ItemAbilities = new ItemAbilities().Read(io);
+            if (Item.Version < 3)
+                ItemTimelines = new ItemTimelines().Read(io);
+            ItemMaterials = new ItemMaterials().Read(io);
+            if (Item.Version < 5)
+                CompositionDisplay = new CompositionDisplay().Read(io);
+            else
+            {
+                short count = io.ReadInt16();
+                DisplayString = io.ReadString(count);
+            }
+            Level = io.ReadInt32();
+            DamageType = io.ReadInt32();
+            Quality = io.ReadInt32();
+            return this;
+        }
+    }
+
+    public class ItemUpgrades
+    {
+        public short Count { get; set; }
+        public ItemUpgrade[] Upgrades { get; set; }
+
+        public ItemUpgrades Read(DAIIO io, ItemEntry item)
+        {
+            Count = io.ReadInt16();
+            Upgrades = new ItemUpgrade[Count];
+            for (int i = 0; i < Count; i++)
+                Upgrades[i] = new ItemUpgrade().Read(io);
+            return this;
+        }
+    }
+
+    public class ItemUpgrade
+    {
+        public int Instance { get; set; }
+        public short Version { get; set; }
+        public BluePrint Asset { get; set; }
+
+        public ItemUpgrade Read(DAIIO io)
+        {
+            Instance = io.ReadBit2(0x18);
+            Version = io.ReadInt16();
+            Asset = new BluePrint().Read(io);
+            return this;
+        }
+    }
+
+    public class CompositionDisplay
+    {
+        public short StringIdCount { get; set; }
+        public int[] StringIds { get; set; }
+
+        public CompositionDisplay Read(DAIIO io)
+        {
+            StringIdCount = io.ReadInt16();
+            StringIds = new int[StringIdCount];
+            for (int i = 0; i < StringIdCount; i++)
+                StringIds[i] = io.ReadInt32();
+            return this;
+        }
+    }
+
+    public class ItemMaterials
+    {
+        public short Count { get; set; }
+        public ItemMaterial[] Materials { get; set; }
+
+        public ItemMaterials Read(DAIIO io)
+        {
+            Count = io.ReadInt16();
+            Materials = new ItemMaterial[Count];
+            for (int i = 0; i < Count; i++)
+                Materials[i] = new ItemMaterial().Read(io);
+            return this;
+        }
+    }
+
+    public class ItemMaterial
+    {
+        public int Complex { get; set; }
+        public int Index { get; set; }
+        public int ShiftedIndex { get { return ((Index + 0x18) << 2); } }
+        public ItemAsset Asset { get; set; }
+
+        public ItemMaterial Read(DAIIO io)
+        {
+            Complex = io.ReadBit2(0x18);
+            Index = io.ReadInt32();
+            Asset = new ItemAsset().Read(io);
+            return this;
+        }
+    }
+
+    public class ItemAbilities
+    {
+        public short Count { get; set; }
+        public ItemAsset[] Abilities { get; set; }
+
+        public ItemAbilities Read(DAIIO io)
+        {
+            Count = io.ReadInt16();
+            Abilities = new ItemAsset[Count];
+            for (int i = 0; i < Count; i++)
+                Abilities[i] = new ItemAsset().Read(io);
+            return this;
+        }
+    }
+
+    public class ItemTimelines
+    {
+        public short Count { get; set; }
+        public ItemAsset[] Abilities { get; set; }
+
+        public ItemTimelines Read(DAIIO io)
+        {
+            Count = io.ReadInt16();
+            Abilities = new ItemAsset[Count];
+            for (int i = 0; i < Count; i++)
+                Abilities[i] = new ItemAsset().Read(io);
+            return this;
+        }
+    }
+
+    public class CraftedStatIntances
+    {
+        public short StatsCount { get; set; }
+        public CraftedStatInstance[] Stats { get; set; }
+
+        public CraftedStatIntances Read(DAIIO io)
+        {
+            StatsCount = io.ReadInt16();
+            Stats = new CraftedStatInstance[StatsCount];
+            for (int i = 0; i < StatsCount; i++)
+                Stats[i] = new CraftedStatInstance().Read(io);
+            return this;
+        }
+    }
+
+    public class CraftedStatInstance
+    {
+        public int Length { get; set; }
+        public short StatsCount { get; set; }
+        public CraftedItemStats[] Stats { get; set; }
+
+        public CraftedStatInstance Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            StatsCount = io.ReadInt16();
+            Stats = new CraftedItemStats[StatsCount];
+            for (int i = 0; i < StatsCount; i++)
+                Stats[i] = new CraftedItemStats().Read(io);
+            return this;
+        }
+    }
+
+    public class CraftedItemStats
+    {
+        public int Complex { get; set; }
+        public ItemAsset StatData { get; set; }
+        public ItemAsset Script { get; set; }
+        public short ArgsCount { get; set; }
+        public ItemAsset[] DelArgs { get; set; }
+        public float DefaultValue { get; set; }
+
+        public CraftedItemStats Read(DAIIO io)
+        {
+            Complex = io.ReadBit2(0x18);
+            StatData = new ItemAsset().Read(io);
+            Script = new ItemAsset().Read(io);
+            ArgsCount = io.ReadInt16();
+            DelArgs = new ItemAsset[ArgsCount];
+            for (int i = 0; i < ArgsCount; i++)
+                DelArgs[i] = new ItemAsset().Read(io);
+            DefaultValue = io.ReadSingle();
+            return this;
+        }
+    }
+
+    public class ItemDynamicStats
+    {
+        public short StatsCount { get; set; }
+        public ItemStatsData[] ItemStats { get; set; }
+
+        public ItemDynamicStats Read(DAIIO io)
+        {
+            StatsCount = io.ReadInt16();
+            ItemStats = new ItemStatsData[StatsCount];
+            for (int i = 0; i < StatsCount; i++)
+                ItemStats[i] = new ItemStatsData().Read(io);
+            return this;
+        }
+    }
+
+    public class ItemStatsData
+    {
+        public int Complex { get; set; }
+        public ItemAsset StatsData { get; set; }
+        public float Value { get; set; }
+
+        public ItemStatsData Read(DAIIO io)
+        {
+            Complex = io.ReadBit2(0x18);
+            StatsData = new ItemAsset().Read(io);
+            Value = io.ReadSingle();
+            return this;
+        }
+    }
+
+    public class ItemEntry
+    {
+        public int Length { get; set; }
+        public short Version { get; set; }
+        public ItemAsset StatsData { get; set; }
+        public int Uid { get; set; }
+        public bool IsForSale { get; set; }
+        public bool IsNew { get; set; }
+        public bool IsCrafted { get; set; }
+        public int StringId { get; set; }
+        public byte StackSize { get; set; }
+        public byte MaxStackSize { get; set; }
+        public byte MasterworkSuccesses { get; set; }
+        public ItemStatInstance StatsInstance { get; set; }
+        public ItemUpgrades ItemUpgrades { get; set; }
+        public bool SuppressClassRestriction { get; set; }
+        public bool IsPlaceHolder { get; set; }
+        public bool HasSoundActionsReference { get; set; }
+        public BluePrint SoundActionsReference { get; set; }
+
+        public ItemEntry Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            if (Length == 0x311)
+                Console.WriteLine(@"Missing data!");
+            var xpos = io.Position;
+            Version = io.ReadInt16();
+            StatsData = new ItemAsset().Read(io);
+            if (Version < 8)
+                Uid = io.ReadInt32();
+            IsForSale = io.ReadBoolean();
+            IsNew = io.ReadBoolean();
+            IsCrafted = io.ReadBoolean();
+            StringId = io.ReadInt32();
+            if (Length > 0x8a)
+            {
+                StatsInstance = new ItemStatInstance(this).Read(io);
+                if ((io.Position - xpos) + 0x10 <= Length)
+                {
+                    ItemUpgrades = new ItemUpgrades().Read(io, this);
+                    SuppressClassRestriction = io.ReadBoolean();
+                    if (Version > 6)
+                        IsPlaceHolder = io.ReadBoolean();
+                    if (Version > 0xA)
+                    {
+                        HasSoundActionsReference = io.ReadBoolean();
+                        if (HasSoundActionsReference)
+                            SoundActionsReference = new BluePrint().Read(io);
+                    }
+                }
+            }
+            else
+            {
+                if ((io.Position - xpos) + 8 <= Length)
+                    StackSize = (byte) io.ReadBit2(0x8);
+                if (Version >= 9 && ((io.Position - xpos) + 8 <= Length))
+                    MaxStackSize = (byte) io.ReadBit2(0x8);
+                if ((io.Position - xpos) + 5 <= Length)
+                    MasterworkSuccesses = (byte) io.ReadBit2(5);
+            }
+            var xxpos = io.Position - xpos;
+            bool flag = Length != xxpos;
+            if (flag)
+                Console.WriteLine(@"Missing data!");
+            return this;
+        }
+    }
+
+
+    public class PartyInventoryManager
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public InventoryManager Manager { get; set; }
+
+        public PartyInventoryManager(SaveDataStructure xstruc)
+        {
+            SStructure = xstruc;
+        }
+
+        public PartyInventoryManager Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            Manager = new InventoryManager(SStructure).Read(io);
+            return this;
+        }
+    }
+
+    public class InventoryManager
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int Length { get; set; }
+        public bool InventoryExist { get; set; }
+        public Inventory Inventory { get; set; }
+        public bool ItemManagerExists { get; set; }
+
+        public InventoryManager(SaveDataStructure xstruc)
+        {
+            SStructure = xstruc;
+        }
+
+        public InventoryManager Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            InventoryExist = io.ReadBoolean();
+            if (InventoryExist)
+                Inventory = new Inventory().Read(io);
+            return this;
+        }
+    }
+
+    public class Inventory
+    {
+        public int Length { get; set; }
+        public short ItemCount { get; set; }
+        public ItemEntry[] Items { get; set; }
+
+        public Inventory Read(DAIIO io)
+        {
+            Length = io.ReadBit2(0x18);
+            ItemCount = io.ReadInt16();
+            Items = new ItemEntry[ItemCount];
+            for (int i = 0; i < ItemCount; i++)
+                Items[i] = new ItemEntry().Read(io);
+            return this;
+        }
+    }
+
+    public class AgentEntity
+    {
+        public SaveDataStructure SStructure { get; private set; }
+        public int WorldStateManagerLength { get; set; }
+        public WorldStateManager WorldStateManager { get; set; }
+        public int PartyManagerLength { get; set; }
+        public PartyManager PartyManager { get; set; }
+        public int PlotSaveGameAgentLength { get; set; }
+        public PlotSaveGame PlotSaveGameAgent { get; set; }
+        public LootManager LootManager { get; set; }
+        public SpawnerCreateManager SpawnerCreateManager { get; set; }
+        public int MapManagerLength { get; set; }
+        public BWMapManager MapManager { get; set; }
+        public int MissionManagerLength { get; set; }
+        public MissionManager MissionManager { get; set; }
+        public SpawnerInits SpawnerInits { get; set; }
+        public TerrainManager Terrain { get; set; }
+        public StoreInventoryManager StoreInventoryManager { get; set; }
+        public int PartyInventoryLength { get; set; }
+        public PartyInventoryManager PartyInventory { get; set; }
+
+        public AgentEntity(SaveDataStructure xstruct)
+        {
+            SStructure = xstruct;
+        }
+
+        public void Read(DAIIO io)
+        {
+            WorldStateManagerLength = io.ReadBit2(0x18);
+            WorldStateManager = new WorldStateManager(SStructure).Read(io);
+            PartyManagerLength = io.ReadBit2(0x18);
+            PartyManager = new PartyManager();
+            PartyManager.Read(io);
+            PlotSaveGameAgentLength = io.ReadBit2(0x18);
+            PlotSaveGameAgent = new PlotSaveGame();
+            PlotSaveGameAgent.Read(io);
+            LootManager = new LootManager(SStructure);
+            LootManager.Read(io);
+            SpawnerCreateManager = new SpawnerCreateManager();
+            SpawnerCreateManager.Read(io);
+            MapManagerLength = io.ReadBit2(0x18);
+            MapManager = new BWMapManager();
+            MapManager.Read(io,SStructure);
+            MissionManagerLength = io.ReadBit2(0x18);
+            MissionManager = new MissionManager(SStructure);
+            MissionManager.Read(io);
+            SpawnerInits = new SpawnerInits().Read(io);
+            Terrain = new TerrainManager(SStructure).Read(io);
+            StoreInventoryManager = new StoreInventoryManager(SStructure).Read(io);
+            PartyInventoryLength = io.ReadBit2(0x18);
+            PartyInventory = new PartyInventoryManager(SStructure).Read(io);
+        }
+
+    }
+}

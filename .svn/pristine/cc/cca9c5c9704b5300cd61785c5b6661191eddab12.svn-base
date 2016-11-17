@@ -1,0 +1,285 @@
+﻿using System;
+using System.Text;
+using Dragon_Age_Inquisition_Save_Editor.DAIO;
+
+namespace Dragon_Age_Inquisition_Save_Editor.SaveData
+{
+    public class CustomizationData
+    {
+        public short Version { get; set; }
+        public int CustomizationLength { get; set; }
+        public int Options { get; set; }
+        public Customization[] Customizations { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            Version = (short) io.ReadBit2(0x10);
+            CustomizationLength = io.ReadBit2(0x18);
+            Options = io.ReadBit2(0x10);
+            Customizations = new Customization[Options];
+            for (int i = 0; i < Options; i++)
+            {
+                var x = new Customization();
+                x.Complex = io.ReadBit2(0x18);
+                x.HeadOverrideIndex = io.ReadBit2(8);
+                x.Gender = io.ReadBit2(8);
+                x.Race = io.ReadBit2(8);
+                x.Hair = io.ReadBit2(8);
+                x.Beard = io.ReadBit2(8);
+                if (Version >= 9)
+                    x.Horns = io.ReadBit2(0x8);
+                x.VectorShaderParams = new VectorShader();
+                x.VectorShaderParams.Read(io);
+                x.TextureShaderParams = new TextureShader();
+                x.TextureShaderParams.Read(io);
+                if (Version >= 0xF)
+                {
+                    x.BodyShaderHandles = new BodyShaderHandles();
+                    x.BodyShaderHandles.Read(io);
+                }
+                if (Version >= 0xC)
+                {
+                    if (Version < 0xE)
+                    {
+                        x.BoneOffsetsV1 = new BoneOffsetsV1();
+                        x.BoneOffsetsV1.Read(io); 
+                    }
+                    else
+                    {
+                        x.BoneOffsetsV2 = new BoneOffsetsV2();
+                        x.BoneOffsetsV2.Read(io);
+                    }
+                }
+                if (Version >= 0x9)
+                {
+                    if (Version >= 0xB)
+                    {
+                        x.HeadVariations = new HeadVariations();
+                        x.HeadVariations.Read(io);
+                    }
+                    else
+                    {
+                        x.FaceVerticesSize = io.ReadBit2(0x20);
+                        x.FaceVerticesBytes = new byte[x.FaceVerticesSize];
+                        for (int j = 0; j < x.FaceVerticesSize; j++)
+                            x.FaceVerticesBytes[j] = (byte)io.ReadBit(0x8);
+                    }
+                }
+                else
+                {
+                    x.FaceCodeVersion = io.ReadBit2(0x20);
+                    int count = io.ReadBit(0x10);
+                    x.FaceCode = "";
+                    for (int j = 0; j < count; j++)
+                        x.FaceCode += (char) io.ReadBit(0x8);
+                }
+                if (Version >= 0x10)
+                {
+                    x.DnaSize = io.ReadBit2(0x20);
+                    x.DnaData = new byte[x.DnaSize];
+                    for (int j = 0; j < x.DnaSize; j++)
+                        x.DnaData[j] = (byte) io.ReadBit(0x8);
+                }
+                Customizations[i] = x;
+            }
+        }
+    }
+
+    public class Customization
+    {
+        public int DnaSize { get; set; }
+        public string FaceCode { get; set; }
+        public int FaceCodeVersion { get; set; }
+        public int Horns { get; set; }
+        public byte[] DnaData { get; set; }
+        public int FaceVerticesSize{ get; set; }
+        public byte[] FaceVerticesBytes { get; set; }
+        public int Beard { get; set; }
+        public int Hair { get; set; }
+        public int Race { get; set; }
+        public int Gender { get; set; }
+        public int HeadOverrideIndex { get; set; }
+        public int Complex { get; set; }
+        public VectorShader VectorShaderParams { get; set; }
+        public TextureShader TextureShaderParams { get; set; }
+        public BodyShaderHandles BodyShaderHandles { get; set; }
+        public BoneOffsetsV1 BoneOffsetsV1 { get; set; }
+        public BoneOffsetsV2 BoneOffsetsV2 { get; set; }
+        public HeadVariations HeadVariations { get; set; }
+    }
+
+    public class VectorShader
+    {
+        public int VectorShaderOffset { get; set; }
+        public short ParamCount { get; set; }
+        public VectorShaderParam[] VectorShaderParams { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            VectorShaderOffset = io.ReadBit2(0x18);
+            ParamCount = (short) io.ReadBit2(0x10);
+            VectorShaderParams = new VectorShaderParam[ParamCount];
+            for (int i = 0; i < ParamCount; i++)
+            {
+                var x = new VectorShaderParam();
+                x.Complex = io.ReadBit2(0x18);
+                x.VSParameterHandle = io.ReadBit2(0x20);
+                x.Value = new byte[0x10];
+                for (int j = 0; j < 0x10; j++)
+                    x.Value[j] = (byte) io.ReadBit(0x8);
+                VectorShaderParams[i] = x;
+            }
+        }
+    }
+
+    public class VectorShaderParam
+    {
+        public int VSParameterHandle { get; set; }
+        public int Complex { get; set; }
+        public byte[] Value { get; set; }
+    }
+
+    public class TextureShader
+    {
+        public int TextureShaderLength { get; set; }
+        public int ParamCount { get; set; }
+        public TextureShaderParam[] TextureShaderParams { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            TextureShaderLength = io.ReadBit2(0x18);
+            ParamCount = (short)io.ReadBit2(0x10);
+            TextureShaderParams = new TextureShaderParam[ParamCount];
+            for (int i = 0; i < ParamCount; i++)
+            {
+                var x = new TextureShaderParam();
+                x.Complex = io.ReadBit2(0x18);
+                x.TSParameterHandle = io.ReadBit2(0x20);
+                x.TextureHandle = io.ReadBit2(0x20);
+                TextureShaderParams[i] = x;
+            }
+        }
+    }
+
+    public class TextureShaderParam
+    {
+        public int TextureHandle { get; set; }
+        public int TSParameterHandle { get; set; }
+        public int Complex { get; set; }
+    }
+
+    public class BodyShaderHandles
+    {
+        public int BodyShaderHandlesLength { get; set; }
+        public int HandleCount { get; set; }
+        public int[] Handles { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            BodyShaderHandlesLength = io.ReadBit2(0x18);
+            HandleCount = io.ReadBit2(0x10);
+            Handles = new int[HandleCount];
+            for (int i = 0; i < HandleCount; i++)
+                Handles[i] = io.ReadBit2(0x20);
+        }
+    }
+
+    public class BoneOffsetsV2
+    {
+        public int BoneOffsetsLength { get; set; }
+        public short BoneOffsetsCount { get; set; }
+        public BoneOffsetEntryV2[] BoneOffsetEntries { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            BoneOffsetsLength = io.ReadBit2(0x18);
+            BoneOffsetsCount = (short) io.ReadBit2(0x10);
+            BoneOffsetEntries = new BoneOffsetEntryV2[BoneOffsetsCount];
+            for (int i = 0; i < BoneOffsetsCount; i++)
+            {
+                var x = new BoneOffsetEntryV2();
+                x.Complex = io.ReadBit2(0x18);
+                x.BoneNameHash = io.ReadBit2(0x20);
+                x.Value = new byte[0xC];
+                for (int j = 0; j < 0xC; j++)
+                    x.Value[j] = (byte) io.ReadBit(0x8);
+                BoneOffsetEntries[i] = x;
+            }
+        }
+    }
+
+    public class BoneOffsetEntryV2
+    {
+        public int Complex { get; set; }
+        public byte[] Value { get; set; }
+        public int BoneNameHash { get; set; }
+    }
+
+    public class BoneOffsetsV1
+    {
+        public int BoneOffsetsLength { get; set; }
+        public short BoneOffsetsCount { get; set; }
+        public BoneOffsetEntryV1[] BoneOffsetEntries { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            BoneOffsetsLength = io.ReadBit2(0x18);
+            BoneOffsetsCount = (short)io.ReadBit2(0x10);
+            BoneOffsetEntries = new BoneOffsetEntryV1[BoneOffsetsCount];
+            for (int i = 0; i < BoneOffsetsCount; i++)
+            {
+                var x = new BoneOffsetEntryV1();
+                x.Complex = io.ReadBit2(0x18);
+                int count = io.ReadBit(0x10);
+                var temp = new byte[count];
+                for (int a = 0; a < count; a++)
+                    temp[a] = (byte) io.ReadBit(0x8);
+                x.BoneName = Encoding.ASCII.GetString(temp);
+                x.Value = new byte[0xC];
+                for (int j = 0; j < 0xC; j++)
+                    x.Value[j] = (byte)io.ReadBit(0x8);
+                BoneOffsetEntries[i] = x;
+            }
+        }
+    }
+
+    public class BoneOffsetEntryV1
+    {
+        public int Complex { get; set; }
+        public byte[] Value { get; set; }
+        public string BoneName { get; set; }
+    }
+
+    public class HeadVariations
+    {
+        public int VariationsLength { get; set; }
+        public short VariationCount { get; set; }
+        public HeadVariation[] Variations { get; set; }
+
+        public void Read(DAIIO io)
+        {
+            VariationsLength = io.ReadBit2(0x18);
+            VariationCount = (short) io.ReadBit2(0x10);
+            Variations = new HeadVariation[VariationCount];
+            for (int i = 0; i < VariationCount; i++)
+            {
+                var x = new HeadVariation();
+                x.AltHeadComplex = io.ReadBit2(0x18);
+                x.Index = (byte) io.ReadBit2(0x8);
+                x.FaceVerticesSize = io.ReadBit2(0x20);
+                x.FaceVerticesBytes = new byte[x.FaceVerticesSize];
+                for (int j = 0; j < x.FaceVerticesSize; j++)
+                    x.FaceVerticesBytes[j] = (byte) io.ReadBit(0x8);
+                Variations[i] = x;
+            }
+        }
+    }
+
+    public class HeadVariation
+    {
+        public int AltHeadComplex { get; set; }
+        public byte Index { get; set; }
+        public int FaceVerticesSize { get; set; }
+        public byte[] FaceVerticesBytes { get; set; }
+    }
+}

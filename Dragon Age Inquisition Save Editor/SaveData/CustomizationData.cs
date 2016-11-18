@@ -13,13 +13,13 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int CustomizationLength { get; set; }
         internal short Options { get; set; }
         public Customization[] Customizations { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public CustomizationData Read(DAIIO io)
         {
             Version = io.ReadInt16();
-            CustomizationLength = io.ReadBit2(0x18);
+            CustomizationLength = io.ReadBit2(LengthBits);
             Options = io.ReadInt16();
             Customizations = new Customization[Options];
             for (int i = 0; i < Options; i++)
@@ -33,8 +33,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
             try
             {
                 io.WriteInt16(Version);
-                if (!skiplength)
-                    io.WriteBits(Length - 0x10, 0x18);
+                if (!skiplength) io.WriteBits(Length - 0x10, LengthBits);
                 if (Customizations == null)
                 {
                     Customizations = new Customization[Options];

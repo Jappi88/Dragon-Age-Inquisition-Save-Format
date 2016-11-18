@@ -9,8 +9,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 {
     public class EntityData : DAInterface<EntityData>
     {
+        public int xLength { get; set; }
         private readonly SaveDataStructure xstruct;
-        public int EntityCreate { get; set; }
         public int EntityInit { get; set; }
         public int TotalSpawnCount { get; set; }
         public short OccupiedPointCount { get; set; }
@@ -22,7 +22,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public short ClonedEventCount { get; set; }
         public int[] ClonedEventIds { get; set; }
         public bool HasLoadSession { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public EntityData(SaveDataStructure xstr)
@@ -32,22 +32,22 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public EntityData Read(DAIIO io)
         {
-            EntityCreate = io.ReadBit2(0x18);
-            SaveDataByteCount = io.ReadBit2(0x20);
-            SaveData = io.ReadBytes(SaveDataByteCount);
-            if (xstruct.EntityVersion < 7)
-            {
-                ClonedEventCount = io.ReadInt16();
-                ClonedEventIds = new int[ClonedEventCount];
-                for (int i = 0; i < ClonedEventCount; i++)
-                    ClonedEventIds[i] = io.ReadBit2(0x18);
-            }
-            HasLoadSession = io.ReadBoolean();
-            EntityInit = io.ReadBit2(0x18);
-            if (xstruct.EntityVersion > 6)
-            {
-                ClonedEventCount = (short) io.ReadBit2(8);
-            }
+            //xLength = io.ReadBit2(LengthBits);
+            //SaveDataByteCount = io.ReadBit2(0x20);
+            //SaveData = io.ReadBytes(SaveDataByteCount);
+            //if (xstruct.EntityVersion < 7)
+            //{
+            //    ClonedEventCount = io.ReadInt16();
+            //    ClonedEventIds = new int[ClonedEventCount];
+            //    for (int i = 0; i < ClonedEventCount; i++)
+            //        ClonedEventIds[i] = io.ReadBit2(0x18);
+            //}
+            //HasLoadSession = io.ReadBoolean();
+            //EntityInit = io.ReadBit2(0x18);
+            //if (xstruct.EntityVersion > 6)
+            //{
+            //    ClonedEventCount = (short) io.ReadBit2(8);
+            //}
 
             //TotalSpawnCount = io.ReadBit2(0x18);
             //if (xstr.EntityVersion < 9)
@@ -85,23 +85,23 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                io.WriteBits(EntityCreate, 0x18);
-                io.WriteBits(SaveDataByteCount, 0x20);
-                if (SaveData == null)
-                    SaveData = new byte[SaveDataByteCount];
-                io.Write(SaveData, 0, SaveDataByteCount);
-                if (xstruct.EntityVersion < 7)
-                {
-                    io.WriteInt16(ClonedEventCount);
-                    if (ClonedEventIds == null)
-                        ClonedEventIds = new int[ClonedEventCount];
-                    for (int i = 0; i < ClonedEventCount; i++)
-                        io.WriteBits(ClonedEventIds[i], 0x18);
-                }
-                io.WriteBoolean(HasLoadSession);
-                io.WriteBits(EntityInit, 0x18);
-                if (xstruct.EntityVersion > 6)
-                    io.WriteBits(ClonedEventCount, 8);
+                //if (!skiplength) io.WriteBits(Length, LengthBits);
+                //io.WriteBits(SaveDataByteCount, 0x20);
+                //if (SaveData == null)
+                //    SaveData = new byte[SaveDataByteCount];
+                //io.Write(SaveData, 0, SaveDataByteCount);
+                //if (xstruct.EntityVersion < 7)
+                //{
+                //    io.WriteInt16(ClonedEventCount);
+                //    if (ClonedEventIds == null)
+                //        ClonedEventIds = new int[ClonedEventCount];
+                //    for (int i = 0; i < ClonedEventCount; i++)
+                //        io.WriteBits(ClonedEventIds[i], 0x18);
+                //}
+                //io.WriteBoolean(HasLoadSession);
+                //io.WriteBits(EntityInit, 0x18);
+                //if (xstruct.EntityVersion > 6)
+                //    io.WriteBits(ClonedEventCount, 8);
 
                 return true;
             }

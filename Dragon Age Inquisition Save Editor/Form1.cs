@@ -50,6 +50,7 @@ namespace Dragon_Age_Inquisition_Save_Editor
             {
                 try
                 {
+                    byte[] data = null;
                     using (var fs = new FileStream(ofd.FileName, FileMode.Open))
                     {
                         var io = new DAIIO(fs,true, 0, 0);
@@ -60,8 +61,15 @@ namespace Dragon_Age_Inquisition_Save_Editor
                             while ((count = io.Read(buf, 0, 0x1000)) > 0)
                                 x.Write(buf, 0, count);
                         }
+                        fs.Seek(0, SeekOrigin.Begin);
+                        SaveData.SaveFormat s = new SaveFormat(fs);
+                        data = s.Rebuild();
+                        Console.WriteLine(data.Length);
                     }
-                    MessageBox.Show(@"Done!");
+                    if (!data.MemCompare(File.ReadAllBytes(ofd.FileName), 0))
+                        MessageBox.Show(@"Invalid Comparison!");
+                    else
+                        MessageBox.Show("Rebuilded File Matches Original!\n Yeeaahhh :P!");
                 }
                 catch (Exception ex)
                 {

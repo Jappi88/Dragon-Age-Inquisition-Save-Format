@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
        internal int xLength { get; set; }
         public ItemAsset StatsData { get; set; }
         public float Value { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public ItemStatsData Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             StatsData = new ItemAsset().Read(io);
             Value = io.ReadSingle();
             return this;
@@ -28,7 +28,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 StatsData.Write(io);
                 io.WriteSingle(Value);
 

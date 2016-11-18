@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         public short Count { get; set; }
         public ItemMaterial[] Materials { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public ItemMaterials Read(DAIIO io)
@@ -36,8 +36,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         Materials[xb] = new ItemMaterial();
                 }
                 io.WriteInt16((short) Materials.Length);
-                for (int i = 0; i < Materials.Length; i++)
-                    Materials[i].Write(io);
+                foreach (ItemMaterial t in Materials)
+                    t.Write(io);
 
                 return true;
             }

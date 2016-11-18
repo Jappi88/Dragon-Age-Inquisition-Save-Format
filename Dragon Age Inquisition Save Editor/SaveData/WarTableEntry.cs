@@ -21,20 +21,18 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public DateTime ProgressTime { get; set; }
         public WarTable WarTable { get; set; }
         private readonly bool _isfirst;
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public WarTableEntry Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             IsEmpty = io.ReadBoolean();
             if (!IsEmpty)
                 WarTable = new WarTable().Read(io);
             if (_isfirst)
             {
-                if (SStructure.ProjectVersion < 0x1A)
-                    ProgressTime = io.ReadInt32().ToUnixTime();
-                else ProgressTime = ((int) io.ReadInt64()).ToUnixTime();
+                ProgressTime = SStructure.ProjectVersion < 0x1A ? io.ReadInt32().ToUnixTime() : ((int) io.ReadInt64()).ToUnixTime();
             }
             return this;
         }
@@ -44,8 +42,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength)
-                    io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBoolean(IsEmpty);
                 if (!IsEmpty)
                 {

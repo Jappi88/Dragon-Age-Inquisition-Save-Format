@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         internal short Count { get; set; }
         public DynamicPinsMap[] Pins { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public DynamicPinsMaps Read(DAIIO io)
@@ -36,8 +36,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         Pins[xb] = new DynamicPinsMap();
                 }
                 io.WriteInt16((short) Pins.Length);
-                for (int i = 0; i < Pins.Length; i++)
-                    Pins[i].Write(io);
+                foreach (DynamicPinsMap t in Pins)
+                    t.Write(io);
 
                 return true;
             }

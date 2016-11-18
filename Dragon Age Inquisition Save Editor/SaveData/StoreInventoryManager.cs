@@ -20,12 +20,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public int UnknownBitLength { get; set; }
         public byte[] UnknownData { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public StoreInventoryManager Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             StoreInventories = new StoreInventories(SStructure).Read(io);
             var x = xLength - Length;
             if (x > 0)
@@ -42,7 +42,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 StoreInventories.Write(io);
                 if (UnknownBitLength > 0)
                 {

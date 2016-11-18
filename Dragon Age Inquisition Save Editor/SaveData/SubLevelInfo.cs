@@ -18,13 +18,13 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int ParentBundleHash { get; set; }
         public int BundleHash { get; set; }
         public string Name { get; set; }
-        public int SubLevel { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
+        internal int XLength { get; private set; }
 
         public SubLevelInfo Read(DAIIO io)
         {
-            SubLevel = io.ReadBit2(0x18);
+            XLength = io.ReadBit2(LengthBits);
             var count = (ushort) io.ReadBit2(0x10);
             Name = io.ReadString(count);
             BundleHash = io.ReadBit2(0x20);
@@ -43,7 +43,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                io.WriteBits(SubLevel, 0x18);
+                if(!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(Name.Length, 0x10);
                 io.WriteString(Name);
                 io.WriteBits(BundleHash, 0x20);
@@ -54,7 +54,6 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                 io.WriteBits(Status, 0x8);
                 io.WriteBits(BundleType, 0x8);
                 io.WriteBits(GroupID, 0x20);
-
                 return true;
             }
             catch (Exception)

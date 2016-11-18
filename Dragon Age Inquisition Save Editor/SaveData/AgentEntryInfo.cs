@@ -14,12 +14,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int NameHash { get; set; }
         public bool HasCustomizationData { get; set; }
         public CustomizationData CustomizationData { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public AgentEntryData Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             NameHash = io.ReadBit2(0x20);
             Version = (short) io.ReadBit2(0x10);
             HasCustomizationData = io.ReadBoolean();
@@ -33,7 +33,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(NameHash, 0x20);
                 io.WriteBits(Version, 0x10);
                 io.WriteBoolean(HasCustomizationData);

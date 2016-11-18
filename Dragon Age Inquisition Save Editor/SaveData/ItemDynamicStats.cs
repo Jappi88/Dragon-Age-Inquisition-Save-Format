@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         public short StatsCount { get; set; }
         public ItemStatsData[] ItemStats { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public ItemDynamicStats Read(DAIIO io)
@@ -36,8 +36,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         ItemStats[xb] = new ItemStatsData();
                 }
                 io.WriteInt16((short) ItemStats.Length);
-                for (int i = 0; i < ItemStats.Length; i++)
-                    ItemStats[i].Write(io);
+                foreach (ItemStatsData t in ItemStats)
+                    t.Write(io);
 
                 return true;
             }

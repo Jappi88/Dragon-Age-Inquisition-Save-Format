@@ -6,6 +6,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     public class SaveEntity : DAInterface<SaveEntity>
     {
         private readonly SaveDataStructure xstruct;
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
         public AgentEntity AgentEntityData { get; set; }
         public int AgentsLookupCount { get; set; }

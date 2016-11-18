@@ -29,7 +29,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public BoneOffsetsV2 BoneOffsetsV2 { get; set; }
         public HeadVariations HeadVariations { get; set; }
         private CustomizationData _data;
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public Customization(CustomizationData data)
@@ -39,7 +39,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public Customization Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             HeadOverrideIndex = io.ReadBit2(8);
             Gender = io.ReadBit2(8);
             Race = io.ReadBit2(8);
@@ -96,7 +96,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteBits(HeadOverrideIndex, 0x8);
                 io.WriteBits(Gender, 0x8);
                 io.WriteBits(Race, 0x8);

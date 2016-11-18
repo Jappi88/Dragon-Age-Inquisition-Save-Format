@@ -23,14 +23,16 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int[] ResearchedUpgradeIndexes { get; set; }
         public short PotionBankCount { get; set; }
         public PotionBank[] PotionBanks { get; set; }
+        public bool HasUnknownBank { get; set; }
         public short UnknownBankCount { get; set; }
         public PotionBank[] UnknownBanks { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public PlayerManager Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
+            long xpos = io.Position;
             InventoryExist = io.ReadBoolean();
             if (InventoryExist)
                 Inventory = new Inventory().Read(io);
@@ -50,13 +52,15 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         PotionBanks = new PotionBank[PotionBankCount];
                         for (int i = 0; i < PotionBankCount; i++)
                             PotionBanks[i] = new PotionBank().Read(io);
-                        if (PotionBankCount == 0)
+
+                        if (PotionBankCount > 0)
                         {
                             UnknownBankCount = io.ReadInt16();
                             UnknownBanks = new PotionBank[UnknownBankCount];
                             for (int i = 0; i < UnknownBankCount; i++)
                                 UnknownBanks[i] = new PotionBank().Read(io);
                         }
+
                     }
                 }
             }
@@ -68,7 +72,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBoolean(InventoryExist);
                 if (InventoryExist)
                     Inventory.Write(io);
@@ -91,18 +95,18 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                                 for (int xb = 0; xb < PotionBankCount; xb++)
                                     PotionBanks[xb] = new PotionBank();
                             }
-                            if (UnknownBanks == null)
-                            {
-                                UnknownBanks = new PotionBank[UnknownBankCount];
-
-                                for (int xb = 0; xb < UnknownBankCount; xb++)
-                                    UnknownBanks[xb] = new PotionBank();
-                            }
                             io.WriteInt16((short) PotionBanks.Length);
                             foreach (PotionBank t in PotionBanks)
                                 t.Write(io);
-                            if (UnknownBanks.Length > 0)
+                            if (PotionBanks.Length > 0)
                             {
+                                if (UnknownBanks == null)
+                                {
+                                    UnknownBanks = new PotionBank[UnknownBankCount];
+
+                                    for (int xb = 0; xb < UnknownBankCount; xb++)
+                                        UnknownBanks[xb] = new PotionBank();
+                                }
                                 io.WriteInt16((short) UnknownBanks.Length);
                                 foreach (PotionBank t in UnknownBanks)
                                     t.Write(io);

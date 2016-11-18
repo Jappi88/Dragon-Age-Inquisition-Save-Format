@@ -13,12 +13,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public string Name { get; set; }
         public byte[] Hash { get; set; }
         public byte[] Unknown { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public StateHistory Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Name = "";
             var xpos = io.Position;
             var count = (ushort) io.ReadBit(0x10);
@@ -51,7 +51,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(Name.Length, 0x10);
                 if (Name.Length > 0)
                 {

@@ -17,12 +17,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int[] PartIds { get; set; }
         public int BitCount { get; set; }
         public byte[] BitArray { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public CallBackData Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Id = io.ReadInt32();
             DestroyedPartsCount = io.ReadInt32();
             KeepInfoOnUnregister = io.ReadBoolean();
@@ -42,7 +42,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt32(Id);
                 io.WriteInt32(DestroyedPartsCount);
                 io.WriteBoolean(KeepInfoOnUnregister);

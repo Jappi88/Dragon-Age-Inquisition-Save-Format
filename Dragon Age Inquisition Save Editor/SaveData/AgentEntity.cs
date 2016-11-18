@@ -34,12 +34,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int PartyPlayerManagerLength { get; set; }
         public PartyPlayerManager PartyInventory { get; set; }
         public JournalManager JournalManager { get; set; }
-
+        public uint LengthBits => 0x20;
         public int Length => this.InstanceLength();
 
         public AgentEntity Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x20);
+            xLength = io.ReadBit2(LengthBits);
             WorldStateManagerLength = io.ReadBit2(0x18);
             WorldStateManager = new WorldStateManager(SStructure).Read(io);
             PartyManagerLength = io.ReadBit2(0x18);
@@ -67,7 +67,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x20);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(WorldStateManager.Length + 0x18, 0x18);
                 WorldStateManager.Write(io);
                 io.WriteBits(PartyManager.Length + 0x18, 0x18);

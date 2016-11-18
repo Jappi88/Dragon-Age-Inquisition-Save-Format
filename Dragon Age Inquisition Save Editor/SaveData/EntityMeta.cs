@@ -14,11 +14,11 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public ExternalReference[] ExternalReferences { get; set; }
         public short DeletedEntityCount { get; set; }
         public int[] DeletedEntities { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
         public EntityMeta Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             LookupTableCount = (short)io.ReadBit2(0x10);
             LookupTables = new LookupTable[LookupTableCount];
             for (int i = 0; i < LookupTableCount; i++)
@@ -42,7 +42,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public bool Write(DAIIO io, bool skiplength = false)
         {
-            if (!skiplength) io.WriteBits(Length, 0x18);
+            if (!skiplength) io.WriteBits(Length, LengthBits);
             if (LookupTables == null)
             {
                 LookupTables = new LookupTable[LookupTableCount];

@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public short xLength { get; set; }
         public bool IsInVehicle { get; set; }
         public InVehicleControllable InVehicleControllable { get; set; }
-
+        public uint LengthBits => 0x10;
         public int Length => this.InstanceLength();
 
         public SpawnerControllable Read(DAIIO io)
         {
-            xLength = io.ReadInt16();
+            xLength = (short) io.ReadBit2(LengthBits);
             IsInVehicle = io.ReadBoolean();
             if (IsInVehicle)
             {
@@ -35,7 +35,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteInt16((short) Length);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBoolean(IsInVehicle);
                 if (IsInVehicle)
                 {

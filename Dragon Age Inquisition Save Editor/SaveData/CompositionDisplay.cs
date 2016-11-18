@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         internal short StringIdCount { get; set; }
         public int[] StringIds { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public CompositionDisplay Read(DAIIO io)
@@ -31,8 +31,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                 if (StringIds == null)
                     StringIds = new int[StringIdCount];
                 io.WriteInt16((short)StringIds.Length);
-                for (int i = 0; i < StringIds.Length; i++)
-                    io.WriteInt32(StringIds[i]);
+                foreach (int t in StringIds)
+                    io.WriteInt32(t);
 
                 return true;
             }

@@ -19,11 +19,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal short StateHistoryCount { get; set; }
         public StateHistory[] StateHistories { get; set; }
 
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public WorldStateManager Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             StateHistoryCount = io.ReadInt16();
             StateHistories = new StateHistory[StateHistoryCount];
             for (int i = 0; i < StateHistoryCount; i++)
@@ -36,8 +37,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength)
-                    io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt16(StateHistoryCount);
                 if (StateHistories == null)
                 {

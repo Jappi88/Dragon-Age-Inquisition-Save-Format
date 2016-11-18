@@ -13,7 +13,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public bool IsHuman { get; set; }
         public bool HasPlayer { get; set; }
         public int PlayerID { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public Controllable Read(DAIIO io)

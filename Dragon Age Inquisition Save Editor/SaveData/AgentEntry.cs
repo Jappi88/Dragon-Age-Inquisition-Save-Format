@@ -12,7 +12,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public short Entry { get; set; }
         public int NameHash { get; set; }
         public short Index { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public AgentEntry Read(DAIIO io)

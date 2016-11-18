@@ -23,7 +23,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int MissionArray1Count { get; set; }
         public MissionArray[] MissionArray1 { get; set; }
         public int Completed { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
 
@@ -31,7 +31,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(InProgress, 0x18);
                 io.WriteInt32(MissionArraySize);
                 if (MissionArray0 == null)
@@ -66,7 +66,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public MissionManager Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             InProgress = io.ReadBit2(0x18);
             MissionArraySize = io.ReadInt32();
             MissionArray0Count = io.ReadInt16();

@@ -15,12 +15,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int Player { get; set; }
         public bool IsLeader { get; set; }
         public bool IsUnspawned { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public PartyMember Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             PartyMemberID = io.ReadInt32();
             FixedIndex = (byte) io.ReadBit2(8);
             Player = io.ReadInt32();
@@ -34,7 +34,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteInt32(PartyMemberID);
                 io.WriteBits(FixedIndex, 8);
                 io.WriteInt32(Player);

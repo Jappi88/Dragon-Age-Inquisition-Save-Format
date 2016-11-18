@@ -13,7 +13,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int PartyMemberID { get; set; }
         public int BufferSize { get; set; }
         public byte[] Buffer { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public PartyMemberDataCache Read(DAIIO io)

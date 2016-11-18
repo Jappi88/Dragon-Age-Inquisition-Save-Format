@@ -494,7 +494,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.DAIO
             var count = (((totalbits >> 3) & 0x1FFFFFFF) & 0x1FFFFFFC);
             if(data == null)
                 data = new byte[count];
-                
+            if (count > data.Length)
+                Array.Resize(ref data, count);
             while (totalbits >= 0x20)
             {
                 var d = new byte[0x4];

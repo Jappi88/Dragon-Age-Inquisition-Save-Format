@@ -15,12 +15,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal short ArgsCount { get; set; }
         public ItemAsset[] DelArgs { get; set; }
         public float DefaultValue { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public CraftedItemStats Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             StatData = new ItemAsset().Read(io);
             Script = new ItemAsset().Read(io);
             ArgsCount = io.ReadInt16();
@@ -36,7 +36,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 StatData.Write(io);
                 Script.Write(io);
                 if (DelArgs == null)
@@ -47,8 +47,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         DelArgs[xb] = new ItemAsset();
                 }
                 io.WriteInt16((short) DelArgs.Length);
-                for (int i = 0; i < DelArgs.Length; i++)
-                    DelArgs[i].Write(io);
+                foreach (ItemAsset t in DelArgs)
+                    t.Write(io);
                 io.WriteSingle(DefaultValue);
 
                 return true;

@@ -16,12 +16,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public bool IsCompressed { get; set; }
         public int Size { get; set; }
         public byte[] Blob { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public Map Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             MapID = io.ReadInt32();
             IsPersistent = io.ReadBoolean();
             UncompressedSize = io.ReadInt32();
@@ -38,7 +38,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteInt32(MapID);
                 io.WriteBoolean(IsPersistent);
                 io.WriteInt32(UncompressedSize);
@@ -46,8 +46,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                 if (Blob == null)
                     Blob = new byte[Size];
                 io.WriteInt32(Blob.Length);
-                for (int i = 0; i < Blob.Length; i++)
-                    io.WriteBits(Blob[i], 0x8);
+                foreach (byte t in Blob)
+                    io.WriteBits(t, 0x8);
 
                 return true;
             }

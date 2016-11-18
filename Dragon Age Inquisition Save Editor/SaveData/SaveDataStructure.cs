@@ -44,7 +44,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public ClientAgent ClientData { get; set; }
         internal int LastPartSeedLength { get; set; }
         internal int LastPartSeed { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
         
         public SaveDataStructure Read(DAIIO io)
@@ -98,9 +98,13 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
             tmpdata = io.ReadData((int) (EntityContentLength - (io.Position - xpos))); ////////
             //////////////////////////////////////////////////////////////////////////////////
             SaveEntityComplexLength = io.ReadBit2(6);
-            SaveEntityComplex = io.ReadData(SaveEntityComplexLength);
+
+
+            SaveEntityComplex = io.ReadData((int)SaveEntityComplexLength);
             SaveEntityBookmark = io.ReadBit2(0x1A);
             SaveEntity = new SaveEntity(this).Read(io);
+
+
             EntityMetaData = new EntityMeta(this).Read(io);
             AgentToc = new AgentToc().Read(io);
             //var xdio = new DAIIO(io.xbaseStream, io.Position, ClientDataLength) {IsBigEndian = true};
@@ -198,7 +202,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                 EntityContent.Write(io);/////////////////////////////////////////////////////
                 //MUST WRITE UNFINISHED RAW DATA, REMOVE IF CONTENT HAS BEEN MAPPED OUT/////
                 if (tmpdata.Length > 0)////////////////////////////////////////////////////
-                    io.WriteData(tmpdata, EntityContentLength - EntityContent.Length);////
+                    io.WriteData(tmpdata, (EntityContentLength - EntityContent.Length ));////
                 /////////////////////////////////////////////////////////////////////////
 
                 //Start writing SaveEntity
@@ -206,15 +210,16 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                 io.WriteBits(SaveEntityComplexLength, 6);
                 io.WriteData(SaveEntityComplex, SaveEntityComplexLength);
                 io.WriteBits(SaveEntityBookmark, 0x1A);
-                SaveEntity?.Write(io);
-                EntityMetaData?.Write(io);
-                AgentToc?.Write(io);
-                ClientData?.Write(io);
+                SaveEntity.Write(io);
+                EntityMetaData.Write(io);
+                AgentToc.Write(io);
+                ClientData.Write(io);
                // io.FinishWriter();
                 if (LastPartSeedLength > 0)
                 {
                     io.WriteBits((uint)LastPartSeed, (uint) LastPartSeedLength,true);
                 }
+                io.Flush();
                 return true;
             }
             catch (Exception)

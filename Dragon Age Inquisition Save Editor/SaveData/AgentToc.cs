@@ -6,13 +6,13 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         internal int xLength { get; set; }
         public int Length => this.InstanceLength();
-
+        public uint LengthBits => 0x18;
         public int AgentCount { get; set; }
         public AgentEntry[] Agents { get; set; }
 
         public AgentToc Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             AgentCount = io.ReadBit2(0x4);
             Agents = new AgentEntry[AgentCount];
             for (int i = 0; i < AgentCount; i++)
@@ -22,7 +22,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public bool Write(DAIIO io, bool skiplength = false)
         {
-            if (!skiplength) io.WriteBits(Length, 0x18);
+            if (!skiplength) io.WriteBits(Length, LengthBits);
             if (Agents == null)
             {
                 Agents = new AgentEntry[AgentCount];

@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int xLength { get; set; }
         internal short MapCount { get; set; }
         public Map[] Maps { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public FogArchive Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             MapCount = io.ReadInt16();
             Maps = new Map[MapCount];
             for (int i = 0; i < MapCount; i++)
@@ -30,7 +30,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 if (Maps == null)
                 {
                     Maps = new Map[MapCount];

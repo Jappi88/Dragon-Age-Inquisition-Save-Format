@@ -9,17 +9,17 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 {
     public class ControllableCreate : DAInterface<ControllableCreate>
     {
-        internal short xLength { get; set; }
+        internal int xLength { get; set; }
         public bool HasControllable { get; set; }
         public Controllable Controllable { get; set; }
         public byte[][] TransForm { get; set; }
         public short IndexUsedByUniqueId { get; set; }
-
+        public uint LengthBits => 0x10;
         public int Length => this.InstanceLength();
 
         public ControllableCreate Read(DAIIO io)
         {
-            xLength = io.ReadInt16();
+            xLength = io.ReadBit2(LengthBits);
             HasControllable = io.ReadBoolean();
             if (HasControllable)
             {
@@ -44,7 +44,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteInt16((short) Length);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBoolean(HasControllable);
                 if (HasControllable)
                 {

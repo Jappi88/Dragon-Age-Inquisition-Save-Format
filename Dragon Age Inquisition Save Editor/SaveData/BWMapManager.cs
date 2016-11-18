@@ -17,7 +17,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public DynamicPinsMaps DynamicPinsMaps { get; set; }
         public MapPins DiscoveredPins { get; set; }
         public MapPins ExploredPins { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public BWMapManager(SaveDataStructure xstruc)
@@ -27,7 +27,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public BWMapManager Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             //if(6 (<-????) > 5)
             //{ 
             UserWaypoint_MapId = io.ReadInt32();
@@ -47,7 +47,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 //if(6 (<-????) > 5)
                 //{ 
                 io.WriteInt32(UserWaypoint_MapId);

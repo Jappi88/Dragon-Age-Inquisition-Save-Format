@@ -20,11 +20,11 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int Level { get; set; }
         public int DamageType { get; set; }
         public int Quality { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
-        private ItemStatsInstance _info;
-        private bool _iscrafted;
+        private readonly ItemStatsInstance _info;
+        private readonly bool _iscrafted;
 
         public ItemStatInstance(ItemStatsInstance info, bool iscrafted)
         {

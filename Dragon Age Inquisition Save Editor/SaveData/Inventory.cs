@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int xLength { get; set; }
         internal short ItemCount { get; set; }
         public ItemEntry[] Items { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public Inventory Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             ItemCount = io.ReadInt16();
             Items = new ItemEntry[ItemCount];
             for (int i = 0; i < ItemCount; i++)
@@ -30,7 +30,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 if (Items == null)
                 {
                     Items = new ItemEntry[ItemCount];

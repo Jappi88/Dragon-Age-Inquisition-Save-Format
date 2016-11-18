@@ -10,7 +10,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     public class ItemUpgrade : DAInterface<ItemUpgrade>
     {
         public ItemStatsInstance Stats { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public ItemUpgrade Read(DAIIO io)

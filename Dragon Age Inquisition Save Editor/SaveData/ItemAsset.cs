@@ -14,7 +14,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int Value2 { get; set; }
         public bool DataIsNull { get; set; }
         public byte[] DataBytes { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public ItemAsset Read(DAIIO io)

@@ -14,7 +14,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int CreatePos { get; set; }
         public bool HasInitPos { get; set; }
         public int InitPos { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public LookupTable Read(DAIIO io)

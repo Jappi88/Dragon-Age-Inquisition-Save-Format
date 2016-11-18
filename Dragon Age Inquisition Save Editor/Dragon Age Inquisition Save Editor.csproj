@@ -78,7 +78,6 @@
     <Compile Include="DAIO\DA3CRC.cs" />
     <Compile Include="SaveData\DA3PartyMemberDataCache.cs" />
     <Compile Include="SaveData\DAInterface.cs" />
-    <Compile Include="SaveData\DataCache.cs" />
     <Compile Include="SaveData\DynamicLootOwners.cs" />
     <Compile Include="SaveData\DynamicMapPinInfo.cs" />
     <Compile Include="SaveData\DynamicPinsMap.cs" />
@@ -135,7 +134,6 @@
     <Compile Include="SaveData\SpawnerControllable.cs" />
     <Compile Include="SaveData\SpawnerCreate.cs" />
     <Compile Include="SaveData\SpawnerCreateManager.cs" />
-    <Compile Include="SaveData\SpawnerInit.cs" />
     <Compile Include="SaveData\SpawnerInits.cs" />
     <Compile Include="SaveData\StateHistory.cs" />
     <Compile Include="SaveData\StoreInventories.cs" />

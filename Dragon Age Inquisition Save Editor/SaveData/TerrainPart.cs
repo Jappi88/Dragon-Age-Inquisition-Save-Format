@@ -17,12 +17,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal SaveDataStructure SStructure { get; private set; }
         internal int xLength { get; set; }
         public PartDestructionComplex DestructionComplex { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public TerrainPart Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             if (SStructure.SaveVersion >= 0x11)
                 DestructionComplex = new PartDestructionComplex(SStructure).Read(io);
             return this;
@@ -33,7 +33,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 if (SStructure.SaveVersion >= 0x11)
                     DestructionComplex.Write(io);
 

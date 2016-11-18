@@ -11,17 +11,17 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         internal int xLength { get; set; }
         public short Count { get; set; }
-        public SpawnerInit[] Inits { get; set; }
-
+        public Spawner[] Inits { get; set; }
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public SpawnerInits Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Count = io.ReadInt16();
-            Inits = new SpawnerInit[Count];
+            Inits = new Spawner[Count];
             for (int i = 0; i < Count; i++)
-                Inits[i] = new SpawnerInit().Read(io);
+                Inits[i] = new Spawner().Read(io);
             return this;
         }
 
@@ -30,14 +30,14 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt16(Count);
                 if (Inits == null)
                 {
-                    Inits = new SpawnerInit[Count];
+                    Inits = new Spawner[Count];
 
                     for (int xb = 0; xb < Count; xb++)
-                        Inits[xb] = new SpawnerInit();
+                        Inits[xb] = new Spawner();
                 }
                 for (int i = 0; i < Count; i++)
                     Inits[i].Write(io);

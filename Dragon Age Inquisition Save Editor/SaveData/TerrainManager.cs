@@ -18,11 +18,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int xLength { get; set; }
         public Terrain Terrain { get; set; }
         public TerrainPart Part { get; set; }
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public TerrainManager Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Terrain = new Terrain(SStructure).Read(io);
             Part = new TerrainPart(SStructure).Read(io);
             return this;
@@ -33,7 +34,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 Terrain.Write(io);
                 Part.Write(io);
                 return true;

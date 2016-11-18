@@ -18,12 +18,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public bool DisplayAsDiscovered { get; set; }
         public bool DisplayAsExplored { get; set; }
         public bool DeadOrDying { get; set; }
-
+        public uint LengthBits => 0xA;
         public int Length => this.InstanceLength();
 
         public DynamicMapPinInfo Read(DAIIO io)
         {
-            xLength = (short) io.ReadBit2(0xA);
+            xLength = (short) io.ReadBit2(LengthBits);
             PinGuid = new byte[0x10];
             io.Read(PinGuid, 0, 0x10);
             WorldPos = new byte[0xc];
@@ -43,7 +43,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0xA);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 if (PinGuid == null)
                     PinGuid = new byte[0x10];
                 io.Write(PinGuid, 0, 0x10);

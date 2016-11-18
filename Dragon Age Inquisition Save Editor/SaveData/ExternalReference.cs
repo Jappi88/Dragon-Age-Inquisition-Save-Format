@@ -13,7 +13,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int Bundle { get; set; }
         internal short EntityCount { get; set; }
         public int[] Entities { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public ExternalReference Read(DAIIO io)

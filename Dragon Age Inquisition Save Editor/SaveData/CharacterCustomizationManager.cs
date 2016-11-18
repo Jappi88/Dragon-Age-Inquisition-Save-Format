@@ -22,12 +22,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int CharacterSubclassID { get; set; }
         public byte[] CharacterID { get; set; }
         public float AgeInRealTimeSeconds { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public CharacterCustomizationManager Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Version = io.ReadInt32();
             ClassId = io.ReadInt32();
             BackgroundId = io.ReadInt32();
@@ -55,7 +55,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt32(Version);
                 io.WriteInt32(ClassId);
                 io.WriteInt32(BackgroundId);

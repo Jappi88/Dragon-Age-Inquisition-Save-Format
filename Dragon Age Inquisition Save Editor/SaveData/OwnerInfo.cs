@@ -19,12 +19,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int Id { get; set; }
         public short CallbackCount { get; set; }
         public CallBackData[] Callbacks { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public OwnerInfo Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Id = io.ReadInt32();
             CallbackCount = io.ReadInt16();
             Callbacks = new CallBackData[CallbackCount];
@@ -38,7 +38,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt32(Id);
                 io.WriteInt16(CallbackCount);
                 if (Callbacks == null)

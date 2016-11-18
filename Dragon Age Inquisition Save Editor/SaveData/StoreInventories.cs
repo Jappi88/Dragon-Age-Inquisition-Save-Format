@@ -19,12 +19,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int Version { get; set; }
         public short InventoryCount { get; set; }
         public StoreInventory[] Inventories { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public StoreInventories Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Version = io.ReadInt32();
             InventoryCount = io.ReadInt16();
             Inventories = new StoreInventory[InventoryCount];
@@ -37,7 +37,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt32(Version);
                 if (Inventories == null)
                 {

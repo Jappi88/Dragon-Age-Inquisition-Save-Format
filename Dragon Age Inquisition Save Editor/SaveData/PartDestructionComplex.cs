@@ -18,12 +18,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int xLength { get; set; }
         public short OwnerInfoCount { get; set; }
         public OwnerInfo[] OwnerInfos { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public PartDestructionComplex Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             OwnerInfoCount = io.ReadInt16();
             OwnerInfos = new OwnerInfo[OwnerInfoCount];
             for (int i = 0; i < OwnerInfoCount; i++)
@@ -36,7 +36,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt16(OwnerInfoCount);
                 if (OwnerInfos == null)
                 {

@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         public int[] Agent { get; set; }
         public short Index { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public AgentLookup Read(DAIIO io)

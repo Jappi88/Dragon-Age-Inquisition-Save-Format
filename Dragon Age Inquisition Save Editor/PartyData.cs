@@ -6,12 +6,8 @@ namespace Dragon_Age_Inquisition_Save_Editor
 {
    public class PartyData : DAInterface<PartyData>
    {
-       public int GetLength(bool skiplength)
-       {
-           throw new NotImplementedException();
-       }
-
-       public int Length => this.InstanceLength();
+        public uint LengthBits => 0x18;
+        public int Length => this.InstanceLength();
 
        internal int xLength { get; set; }
        internal short ArcheTypeCount { get; set; }
@@ -25,7 +21,7 @@ namespace Dragon_Age_Inquisition_Save_Editor
 
        public PartyData Read(DAIIO io)
        {
-           xLength = io.ReadBit2(0x18);
+           xLength = io.ReadBit2(LengthBits);
            ArcheTypeCount = io.ReadInt16();
            ArcheTypes = new ArcheType[ArcheTypeCount];
            for (int i = 0; i < ArcheTypeCount; i++)
@@ -50,8 +46,8 @@ namespace Dragon_Age_Inquisition_Save_Editor
        {
            try
            {
-               if (!skiplength) io.WriteBits(Length, 0x18);
-               io.WriteInt16(ArcheTypeCount);
+               if (!skiplength) io.WriteBits(Length, LengthBits);
+               
                if (ArcheTypes == null)
                {
                    ArcheTypes = new ArcheType[ArcheTypeCount];
@@ -59,23 +55,26 @@ namespace Dragon_Age_Inquisition_Save_Editor
                    for (int xb = 0; xb < ArcheTypeCount; xb++)
                        ArcheTypes[xb] = new ArcheType();
                }
-               for (int i = 0; i < ArcheTypeCount; i++)
-                   ArcheTypes[i].Write(io);
-               io.WriteInt16(DesiredPartyMemberIDCount);
+                io.WriteInt16((short) ArcheTypes.Length);
+                foreach (ArcheType t in ArcheTypes)
+                   t.Write(io);
+                
                if (DesiredPartyMemberIDs == null)
                {
                    DesiredPartyMemberIDs = new int[DesiredPartyMemberIDCount];
                }
-               for (int i = 0; i < DesiredPartyMemberIDCount; i++)
-                   io.WriteInt32(DesiredPartyMemberIDs[i]);
-               io.WriteInt16(OverridePartyMemberIDCount);
+                io.WriteInt16((short) DesiredPartyMemberIDs.Length);
+                foreach (int t in DesiredPartyMemberIDs)
+                    io.WriteInt32(t);
+              
                if (OverridePartyMemberIDs == null)
                {
                    OverridePartyMemberIDs = new int[OverridePartyMemberIDCount];
                }
-               for (int i = 0; i < OverridePartyMemberIDCount; i++)
-                   io.WriteInt32(OverridePartyMemberIDs[i]);
-               io.WriteInt16(PartyMemberCount);
+                io.WriteInt16((short) OverridePartyMemberIDs.Length);
+                foreach (int t in OverridePartyMemberIDs)
+                    io.WriteInt32(t);
+               
                if (PartyMembers == null)
                {
                    PartyMembers = new PartyMember[PartyMemberCount];
@@ -83,8 +82,9 @@ namespace Dragon_Age_Inquisition_Save_Editor
                    for (int xb = 0; xb < PartyMemberCount; xb++)
                        PartyMembers[xb] = new PartyMember();
                }
-               for (int i = 0; i < PartyMemberCount; i++)
-                   PartyMembers[i].Write(io);
+                io.WriteInt16((short) PartyMembers.Length);
+                foreach (PartyMember t in PartyMembers)
+                    t.Write(io);
                return true;
            }
            catch (Exception)

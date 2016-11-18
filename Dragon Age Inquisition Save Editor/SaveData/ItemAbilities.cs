@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         public short Count { get; set; }
         public ItemAsset[] Abilities { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public ItemAbilities Read(DAIIO io)
@@ -36,8 +36,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         Abilities[xb] = new ItemAsset();
                 }
                 io.WriteInt16((short) Abilities.Length);
-                for (int i = 0; i < Abilities.Length; i++)
-                    Abilities[i].Write(io);
+                foreach (ItemAsset t in Abilities)
+                    t.Write(io);
 
                 return true;
             }

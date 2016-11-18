@@ -13,12 +13,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int ID { get; set; }
         public short ControllablesCount { get; set; }
         public ControllableCreate[] Controllables { get; set; }
-
+        public uint LengthBits => 0x14;
         public int Length => this.InstanceLength();
 
         public SpawnerCreate Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x14);
+            xLength = io.ReadBit2(LengthBits);
             ID = io.ReadBit2(0x20);
             ControllablesCount = io.ReadInt16();
             Controllables = new ControllableCreate[ControllablesCount];
@@ -32,7 +32,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x14);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(ID, 0x20);
                 if (Controllables == null)
                 {

@@ -13,12 +13,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public byte Index { get; set; }
         public int FaceVerticesSize { get; set; }
         public byte[] FaceVerticesBytes { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public HeadVariation Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Index = (byte) io.ReadBit2(0x8);
             FaceVerticesSize = io.ReadBit2(0x20);
             FaceVerticesBytes = new byte[FaceVerticesSize];
@@ -32,7 +32,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteBits(Index, 0x8);
                 if (FaceVerticesBytes == null)
                     FaceVerticesBytes = new byte[FaceVerticesSize];

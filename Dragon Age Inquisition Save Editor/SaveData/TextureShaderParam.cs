@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int TextureHandle { get; set; }
         public int TSParameterHandle { get; set; }
        internal int xLength { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public TextureShaderParam Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             TSParameterHandle = io.ReadBit2(0x20);
             TextureHandle = io.ReadBit2(0x20);
             return this;
@@ -28,7 +28,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteBits(TSParameterHandle, 0x20);
                 io.WriteBits(TextureHandle, 0x20);
                 return true;

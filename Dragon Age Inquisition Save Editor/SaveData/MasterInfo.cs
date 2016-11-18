@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         public short DestructionInfoCount { get; set; }
         public byte[][] PosAndImpacts { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public MasterInfo Read(DAIIO io)

@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
        internal int xLength { get; set; }
         public byte[] Value { get; set; }
         public int BoneNameHash { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public BoneOffsetEntryV2 Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             BoneNameHash = io.ReadBit2(0x20);
             Value = new byte[0xC];
             for (int j = 0; j < 0xC; j++)
@@ -31,7 +31,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteBits(BoneNameHash, 0x20);
                 if (Value == null)
                     Value = new byte[0xC];

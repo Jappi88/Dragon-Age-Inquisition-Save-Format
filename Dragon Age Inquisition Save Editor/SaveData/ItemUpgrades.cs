@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         public short Count { get; set; }
         public ItemUpgrade[] Upgrades { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public ItemUpgrades Read(DAIIO io)

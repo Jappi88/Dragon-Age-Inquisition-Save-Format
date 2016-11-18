@@ -13,12 +13,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int LevelId { get; set; }
         public int BufferSize { get; set; }
         public byte[] Buffer { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public LootMap Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             LevelId = io.ReadBit2(0x20);
             BufferSize = io.ReadBit2(0x20);
             Buffer = new byte[BufferSize];
@@ -32,13 +32,13 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(LevelId, 0x20);
                 if (Buffer == null)
                     Buffer = new byte[BufferSize];
                 io.WriteBits(Buffer.Length, 0x20);
-                for (int j = 0; j < Buffer.Length; j++)
-                    io.WriteBits(Buffer[j], 0x8);
+                foreach (byte t in Buffer)
+                    io.WriteBits(t, 0x8);
 
                 return true;
             }

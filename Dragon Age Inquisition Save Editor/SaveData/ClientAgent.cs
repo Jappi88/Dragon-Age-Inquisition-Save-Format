@@ -13,12 +13,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public short Version { get; set; }
         internal short AgentCount { get; set; }
         public AgentEntryData[] Agents { get; set; }
-
+        public uint LengthBits => 0x20;
         public int Length => this.InstanceLength();
 
         public ClientAgent Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x20);
+            xLength = io.ReadBit2(LengthBits);
             Version = (short) io.ReadBit2(0x10);
             if (Version == 1)
             {
@@ -35,7 +35,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteBits(Length, 0x20);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(Version, 0x10);
                 if (Version == 1)
                 {

@@ -26,7 +26,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public bool IsPlaceHolder { get; set; }
         public bool HasSoundActionsReference { get; set; }
         public ItemAsset SoundActionsReference { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public ItemStatsInstance()
@@ -35,7 +35,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 
         public ItemStatsInstance Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Offset = io.Position;
             Version = io.ReadInt16();
             StatsData = new ItemAsset().Read(io);
@@ -77,7 +77,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if (!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 Offset = io.Position;
                 io.WriteInt16(Version);
                 if (StatsData == null)

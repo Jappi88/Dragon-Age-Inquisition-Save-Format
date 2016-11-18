@@ -13,12 +13,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int NextUid { get; set; }
         internal short LootOwnersCount { get; set; }
         public LootOwner[] LootOwners { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public DynamicLootOwners Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             NextUid = io.ReadBit2(0x20);
             LootOwnersCount = io.ReadInt16();
             LootOwners = new LootOwner[LootOwnersCount];
@@ -37,7 +37,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBits(NextUid, 0x20);
                 if (LootOwners == null)
                 {

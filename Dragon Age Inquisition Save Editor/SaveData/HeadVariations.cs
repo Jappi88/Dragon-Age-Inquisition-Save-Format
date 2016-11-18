@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int xLength { get; set; }
         internal short VariationCount { get; set; }
         public HeadVariation[] Variations { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public HeadVariations Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             VariationCount = (short) io.ReadBit2(0x10);
             Variations = new HeadVariation[VariationCount];
             for (int i = 0; i < VariationCount; i++)
@@ -30,7 +30,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 if (Variations == null)
                 {
                     Variations = new HeadVariation[VariationCount];

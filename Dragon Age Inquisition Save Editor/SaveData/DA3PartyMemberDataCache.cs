@@ -9,14 +9,15 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 {
     public class DA3PartyMemberDataCache : DAInterface<DA3PartyMemberDataCache>
     {
-        internal const int xLength = 0;
+        internal int xLength;
         internal short Count { get; set; }
         public PartyMemberDataCache[] Caches { get; set; }
-
-        public int Length => 0;
+        public uint LengthBits => 0x18;
+        public int Length => this.InstanceLength();
 
         public DA3PartyMemberDataCache Read(DAIIO io)
         {
+            xLength = io.ReadBit2(LengthBits);
             Count = io.ReadInt16();
             Caches = new PartyMemberDataCache[Count];
             for (int i = 0; i < Count; i++)
@@ -29,7 +30,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 if (Caches == null)
                 {
                     Caches = new PartyMemberDataCache[Count];

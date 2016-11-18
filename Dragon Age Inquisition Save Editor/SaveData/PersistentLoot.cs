@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int xLength { get; set; }
         internal short LootMapCount { get; set; }
         public LootMap[] LootMaps { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public PersistentLoot Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             LootMapCount = io.ReadInt16();
             LootMaps = new LootMap[LootMapCount];
             for (int i = 0; i < LootMapCount; i++)
@@ -30,7 +30,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 if (LootMaps == null)
                 {
                     LootMaps = new LootMap[LootMapCount];

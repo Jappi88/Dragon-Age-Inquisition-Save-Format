@@ -9,14 +9,16 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
 {
     public class Spawner : DAInterface<Spawner>
     {
-        public int ID { get; set; }
+        internal int xLength { get; set; }
+        public int ID { get; private set; }
         public short ControllableCount { get; set; }
         public SpawnerControllable[] Controllables { get; set; }
-
+        public uint LengthBits => 0x14;
         public int Length => this.InstanceLength();
 
         public Spawner Read(DAIIO io)
         {
+            xLength = io.ReadBit2(LengthBits);
             ID = io.ReadInt32();
             ControllableCount = (short) io.ReadBit2(0xA);
             Controllables = new SpawnerControllable[ControllableCount];
@@ -30,6 +32,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteInt32(ID);
                 if (Controllables == null)
                 {
@@ -39,8 +42,8 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         Controllables[xb] = new SpawnerControllable();
                 }
                 io.WriteBits(Controllables.Length, 0xA);
-                for (int i = 0; i < Controllables.Length; i++)
-                    Controllables[i].Write(io);
+                foreach (SpawnerControllable t in Controllables)
+                    t.Write(io);
 
                 return true;
             }

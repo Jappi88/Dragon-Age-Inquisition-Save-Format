@@ -12,12 +12,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         internal int xLength { get; set; }
         public bool CustomizationManagerExists { get; set; }
         public CharacterCustomizationManager CustomizationManager { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public CharacterCustomization Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             CustomizationManagerExists = io.ReadBoolean();
             if (CustomizationManagerExists)
                 CustomizationManager = new CharacterCustomizationManager().Read(io);
@@ -29,7 +29,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength) io.WriteBits(Length, 0x18);
+                if (!skiplength) io.WriteBits(Length, LengthBits);
                 io.WriteBoolean(CustomizationManagerExists);
                 if (CustomizationManagerExists)
                     CustomizationManager.Write(io);

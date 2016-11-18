@@ -12,7 +12,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
        internal int xLength { get; set; }
         public byte[] Guid { get; set; }
         public int Value { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
 

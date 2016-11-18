@@ -194,7 +194,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                 return 0;
             int xreturn = 0;
             var io = new DAIIO(false);
-            instance.Write(io,skiplength);
+            instance.Write(io, skiplength);
             xreturn = (int) io.CurrentBit;
             io.Close();
             return xreturn;

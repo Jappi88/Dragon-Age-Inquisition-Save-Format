@@ -15,12 +15,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int ShiftedIndex => ((Index + 0x18) << 2);
 
         public ItemAsset Asset { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public ItemMaterial Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             Index = io.ReadInt32();
             Asset = new ItemAsset().Read(io);
             return this;
@@ -31,7 +31,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteInt32(Index);
                 Asset.Write(io);
 

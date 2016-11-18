@@ -20,12 +20,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int Index { get; set; }
         private readonly bool _isfirst;
         public WarTableEntry WarTableEntry { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public MissionArray Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             if (_isfirst)
                 Index = io.ReadInt32();
             WarTableEntry = new WarTableEntry(SStructure,_isfirst).Read(io);
@@ -37,7 +37,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 if (_isfirst)
                     io.WriteInt32(Index);
                 WarTableEntry.Write(io);

@@ -11,7 +11,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
     {
         internal short Count { get; set; }
         public byte[][] Guids { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
 

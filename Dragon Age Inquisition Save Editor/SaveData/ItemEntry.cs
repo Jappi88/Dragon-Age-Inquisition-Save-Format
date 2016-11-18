@@ -12,7 +12,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public ItemStatsInstance ItemStats { get; set; }
         public byte MasterworkSuccesses { get; set; }
         public bool MasterworkSuccess { get; set; }
-
+        public uint LengthBits => 0;
         public int Length => this.InstanceLength();
 
         public ItemEntry Read(DAIIO io)

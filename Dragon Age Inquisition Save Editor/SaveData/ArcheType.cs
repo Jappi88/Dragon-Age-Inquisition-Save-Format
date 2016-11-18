@@ -13,12 +13,12 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         public int ArcheTypeID { get; set; }
         public bool Enabled { get; set; }
         public bool Unlocked { get; set; }
-
+        public uint LengthBits => 0x18;
         public int Length => this.InstanceLength();
 
         public ArcheType Read(DAIIO io)
         {
-            xLength = io.ReadBit2(0x18);
+            xLength = io.ReadBit2(LengthBits);
             ArcheTypeID = io.ReadInt32();
             Enabled = io.ReadBoolean();
             Unlocked = io.ReadBoolean();
@@ -30,7 +30,7 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
         {
             try
             {
-                if(!skiplength)io.WriteBits(Length, 0x18);
+                if(!skiplength)io.WriteBits(Length, LengthBits);
                 io.WriteInt32(ArcheTypeID);
                 io.WriteBoolean(Enabled);
                 io.WriteBoolean(Unlocked);

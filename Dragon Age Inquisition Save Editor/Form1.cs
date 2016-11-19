@@ -53,18 +53,12 @@ namespace Dragon_Age_Inquisition_Save_Editor
                     byte[] data = null;
                     using (var fs = new FileStream(ofd.FileName, FileMode.Open))
                     {
-                        var io = new DAIIO(fs,true, 0, 0);
-                        using (var x = File.Create(ofd.FileName + ".NewFile"))
+                        using (var x = File.Create(ofd.FileName + ".Rebuilded"))
                         {
-                            int count = 0;
-                            var buf = new byte[0x1000];
-                            while ((count = io.Read(buf, 0, 0x1000)) > 0)
-                                x.Write(buf, 0, count);
+                            SaveData.SaveFormat s = new SaveFormat(fs);
+                            data = s.Rebuild();
+                            x.Write(data, 0, data.Length);
                         }
-                        fs.Seek(0, SeekOrigin.Begin);
-                        SaveData.SaveFormat s = new SaveFormat(fs);
-                        data = s.Rebuild();
-                        Console.WriteLine(data.Length);
                     }
                     if (!data.MemCompare(File.ReadAllBytes(ofd.FileName), 0))
                         MessageBox.Show(@"Invalid Comparison!");

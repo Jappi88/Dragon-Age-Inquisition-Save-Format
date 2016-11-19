@@ -53,13 +53,13 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                         for (int i = 0; i < PotionBankCount; i++)
                             PotionBanks[i] = new PotionBank().Read(io);
 
-                        if (PotionBankCount > 0)
-                        {
-                            UnknownBankCount = io.ReadInt16();
-                            UnknownBanks = new PotionBank[UnknownBankCount];
-                            for (int i = 0; i < UnknownBankCount; i++)
-                                UnknownBanks[i] = new PotionBank().Read(io);
-                        }
+                        //if (PotionBankCount > 0)
+                        //{
+                        //    UnknownBankCount = io.ReadInt16();
+                        //    UnknownBanks = new PotionBank[UnknownBankCount];
+                        //    for (int i = 0; i < UnknownBankCount; i++)
+                        //        UnknownBanks[i] = new PotionBank().Read(io);
+                        //}
 
                     }
                 }
@@ -98,19 +98,19 @@ namespace Dragon_Age_Inquisition_Save_Editor.SaveData
                             io.WriteInt16((short) PotionBanks.Length);
                             foreach (PotionBank t in PotionBanks)
                                 t.Write(io);
-                            if (PotionBanks.Length > 0)
-                            {
-                                if (UnknownBanks == null)
-                                {
-                                    UnknownBanks = new PotionBank[UnknownBankCount];
+                            //if (PotionBanks.Length > 0)
+                            //{
+                            //    if (UnknownBanks == null)
+                            //    {
+                            //        UnknownBanks = new PotionBank[UnknownBankCount];
 
-                                    for (int xb = 0; xb < UnknownBankCount; xb++)
-                                        UnknownBanks[xb] = new PotionBank();
-                                }
-                                io.WriteInt16((short) UnknownBanks.Length);
-                                foreach (PotionBank t in UnknownBanks)
-                                    t.Write(io);
-                            }
+                            //        for (int xb = 0; xb < UnknownBankCount; xb++)
+                            //            UnknownBanks[xb] = new PotionBank();
+                            //    }
+                            //    io.WriteInt16((short) UnknownBanks.Length);
+                            //    foreach (PotionBank t in UnknownBanks)
+                            //        t.Write(io);
+                            //}
                         }
                     }
                 }
